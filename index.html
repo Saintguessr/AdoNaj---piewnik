@@ -202,19 +202,36 @@
 
   // Heuristic: a line is a "chord line" if, once split on whitespace, every
   // token looks like a chord symbol (e.g. G, Am, h, fis, D/Fis, C7, A7+, cis)
-  const CHORD_TOKEN = /^\(?[A-HZ][a-z#b0-9\+\/\.\|\-]*\)?$/;
-  function isChordLine(line){
-    const trimmed = line.trim();
-    if(!trimmed) return false;
-    const tokens = trimmed.split(/\s+/);
-    if(tokens.length === 0) return false;
-    let chordish = 0;
-    tokens.forEach(t => { if(CHORD_TOKEN.test(t)) chordish++; });
-    return chordish / tokens.length >= 0.8 && /[A-Ha-h]/.test(trimmed);
-  }
-  function isRefLine(line){
-    return /^\s*(Ref\.?|Refren|REFREN|Bridge|BRIDGE|Coda)\b/i.test(line);
-  }
+// Zaktualizowany reguła dla akordów (obsługuje małe litery jak h, fis, cis oraz nawiasy [ ] i ( ))
+const CHORD_TOKEN = /^[\[\(]?[A-Za-z][a-zA-Z0-9#b\+\/\.\|\-\(\)]*[\]\)]?$/;
+
+// Dodatkowe symbole w liniach akordowych (np. takty, repetycje 2x, N.C.)
+const CHORD_EXTRA = /^(\||\|\||:\|\||\|\|:|\(?[0-9]+x\)?|x[0-9]+|\(%?\)|N\.?C\.?)$/i;
+
+function isChordLine(line) {
+  const trimmed = line.trim();
+  if (!trimmed) return false;
+
+  // Jeśli linia jest nagłówkiem (np. Refren:), nie traktuj jej jako akordy
+  if (typeof isRefLine === 'function' && isRefLine(line)) return false;
+
+  const tokens = trimmed.split(/\s+/);
+  if (tokens.length === 0) return false;
+
+  let chordish = 0;
+  tokens.forEach(t => {
+    if (CHORD_TOKEN.test(t) || CHORD_EXTRA.test(t)) {
+      chordish++;
+    }
+  });
+
+  // Obniżony próg do 60% trafności
+  return chordish / tokens.length >= 0.6 && /[A-Za-z]/.test(trimmed);
+}
+
+function isRefLine(line) {
+  return /^\s*(Ref\.?|Refren|REFREN|Bridge|BRIDGE|Coda)\b/i.test(line);
+}
 
   function openSong(idx){
     const s = SONGS[idx];
