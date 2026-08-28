@@ -201,18 +201,16 @@
   }
 
   // Heuristic: a line is a "chord line" if, once split on whitespace, every
-  // token looks like a chord symbol (e.g. G, Am, h, fis, D/Fis, C7, A7+, cis)
-// Zaktualizowany reguła dla akordów (obsługuje małe litery jak h, fis, cis oraz nawiasy [ ] i ( ))
-const CHORD_TOKEN = /^[\[\(]?[A-Za-z][a-zA-Z0-9#b\+\/\.\|\-\(\)]*[\]\)]?$/;
+ // Precyzyjna reguła dla akordów (rozpoznaje A-H, a-h, fis, cis, dis, gis, as, es, D/Fis, e-moll, [G] itd.)
+const CHORD_TOKEN = /^[\[\(]?(?:[A-HZ]|[a-h](?:is|es|s)?)[#b]?(?:m|maj|min|dim|aug|sus|add|dur|moll|[0-9]|\+|\-)*(?:\/[A-Ha-hZ][#b]?(?:is|es|s)?[0-9]*)?[\]\)]?$/;
 
-// Dodatkowe symbole w liniach akordowych (np. takty, repetycje 2x, N.C.)
+// Oznaczenia taktów, repetycji (np. 2x) i pauz
 const CHORD_EXTRA = /^(\||\|\||:\|\||\|\|:|\(?[0-9]+x\)?|x[0-9]+|\(%?\)|N\.?C\.?)$/i;
 
 function isChordLine(line) {
   const trimmed = line.trim();
   if (!trimmed) return false;
 
-  // Jeśli linia jest nagłówkiem (np. Refren:), nie traktuj jej jako akordy
   if (typeof isRefLine === 'function' && isRefLine(line)) return false;
 
   const tokens = trimmed.split(/\s+/);
@@ -225,8 +223,8 @@ function isChordLine(line) {
     }
   });
 
-  // Obniżony próg do 60% trafności
-  return chordish / tokens.length >= 0.6 && /[A-Za-z]/.test(trimmed);
+  // Linia zostanie pokolorowana tylko wtedy, gdy co najmniej 75% słów to akordy
+  return chordish / tokens.length >= 0.75 && /[A-Ha-hZ]/.test(trimmed);
 }
 
 function isRefLine(line) {
