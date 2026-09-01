@@ -89,6 +89,11 @@
     background:none; color:var(--accent); font-size:15px; font-weight:700; cursor:pointer;
   }
   .pl-new-btn:active{background:var(--card2);}
+  .pl-sync-btn{
+    width:100%; margin-top:8px; padding:10px; border-radius:12px; border:1px solid var(--border);
+    background:var(--card2); color:var(--muted); font-size:13px; cursor:pointer;
+  }
+  .pl-sync-btn.active{color:var(--accent); border-color:var(--accent);}
   ul.playlists{list-style:none; margin:0; padding:0;}
   ul.playlists li{
     display:flex; align-items:center; border-bottom:1px solid var(--border);
@@ -252,6 +257,7 @@
     <div id="playlistsPane" style="display:none">
       <div class="pl-toolbar">
         <button class="pl-new-btn" id="newPlaylistBtn">+ Nowa setlista</button>
+        <button class="pl-sync-btn" id="syncBtn">🔄 Synchronizacja wyłączona</button>
       </div>
       <div id="playlistsContainer"></div>
     </div>
@@ -312,7 +318,82 @@
 
 </div>
 
-<script>
+<script type="module">
+  // ---------- Firebase (cross-device setlist sync) ----------
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyADWqBD7BHltXrtEPq5nzcQPXbj_EFb1ME",
+    authDomain: "spiewnik-adonaj.firebaseapp.com",
+    projectId: "spiewnik-adonaj",
+    storageBucket: "spiewnik-adonaj.firebasestorage.app",
+    messagingSenderId: "1057517558031",
+    appId: "1:1057517558031:web:74614b50afe7ff7180867a"
+  };
+
+  const fbApp = initializeApp(firebaseConfig);
+  const fbAuth = getAuth(fbApp);
+  const fbDb = getFirestore(fbApp);
+
+  let authReadyPromise = null;
+  function ensureAuth(){
+    if(!authReadyPromise){
+      authReadyPromise = new Promise((resolve) => {
+        onAuthStateChanged(fbAuth, user => {
+          if(user) resolve(user);
+          else signInAnonymously(fbAuth).catch(() => resolve(null));
+        });
+      });
+    }
+    return authReadyPromise;
+  }
+
+  function getSyncCode(){
+    return localStorage.getItem('spiewnik_sync_code') || '';
+  }
+
+  let syncUnsub = null;
+
+  async function connectSync(code, onRemoteUpdate){
+    if(syncUnsub){ syncUnsub(); syncUnsub = null; }
+    localStorage.setItem('spiewnik_sync_code', code);
+    await ensureAuth();
+    const ref = doc(fbDb, 'syncs', code);
+    const snap = await getDoc(ref);
+    if(snap.exists()){
+      const remote = (snap.data() && snap.data().playlists) || [];
+      localStorage.setItem('spiewnik_playlists', JSON.stringify(remote));
+      onRemoteUpdate(remote);
+    } else {
+      const local = JSON.parse(localStorage.getItem('spiewnik_playlists') || '[]');
+      await setDoc(ref, { playlists: local, updatedAt: Date.now() });
+    }
+    syncUnsub = onSnapshot(ref, (snap2) => {
+      if(snap2.metadata.hasPendingWrites) return;
+      const remote = (snap2.data() && snap2.data().playlists) || [];
+      localStorage.setItem('spiewnik_playlists', JSON.stringify(remote));
+      onRemoteUpdate(remote);
+    }, () => { /* connection error - ignore, local copy remains authoritative */ });
+  }
+
+  function disconnectSync(){
+    if(syncUnsub){ syncUnsub(); syncUnsub = null; }
+    localStorage.removeItem('spiewnik_sync_code');
+  }
+
+  async function pushToCloudIfConnected(list){
+    const code = getSyncCode();
+    if(!code) return;
+    try {
+      await ensureAuth();
+      const ref = doc(fbDb, 'syncs', code);
+      await setDoc(ref, { playlists: list, updatedAt: Date.now() });
+    } catch(e){ /* offline / blocked - local copy already saved, will retry on next change */ }
+  }
+
+  // ---------- Main app ----------
 (function(){
   const SONGS = [
   { title: "Adorujmy Najwyższego - AdoNaj",
@@ -3887,6 +3968,7 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
   const playlistsPane = document.getElementById('playlistsPane');
   const playlistsContainer = document.getElementById('playlistsContainer');
   const newPlaylistBtn = document.getElementById('newPlaylistBtn');
+  const syncBtn = document.getElementById('syncBtn');
 
   const playlistDetailView = document.getElementById('playlist-detail-view');
   const pldBackBtn = document.getElementById('pldBackBtn');
@@ -4061,6 +4143,7 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
   }
   function savePlaylists(list){
     try { localStorage.setItem('spiewnik_playlists', JSON.stringify(list)); } catch(e){}
+    pushToCloudIfConnected(list);
   }
   function genId(){
     return 'pl_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
@@ -4106,6 +4189,63 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     renderPlaylists();
     openPlaylistDetail(pl.id);
   });
+
+  // ---------- Sync UI ----------
+  function refreshSyncStatus(tempText){
+    const code = getSyncCode();
+    if(tempText){
+      syncBtn.textContent = tempText;
+      syncBtn.classList.remove('active');
+      return;
+    }
+    if(code){
+      syncBtn.textContent = '🔄 Synchronizacja: ' + code;
+      syncBtn.classList.add('active');
+    } else {
+      syncBtn.textContent = '🔄 Synchronizacja wyłączona';
+      syncBtn.classList.remove('active');
+    }
+  }
+
+  function onRemoteSyncUpdate(){
+    renderPlaylists();
+    if(playlistDetailView.classList.contains('open')){
+      renderPlaylistSongs();
+      renderPlaylistDetailHeader();
+    }
+  }
+
+  syncBtn.addEventListener('click', async () => {
+    const current = getSyncCode();
+    const input = prompt(
+      'Podaj kod synchronizacji - ten sam kod wpisany na innym urządzeniu automatycznie połączy Wasze setlisty.\n\nZostaw puste pole i zatwierdź, aby wyłączyć synchronizację.',
+      current
+    );
+    if(input === null) return;
+    const trimmed = input.trim();
+    if(!trimmed){
+      disconnectSync();
+      refreshSyncStatus();
+      return;
+    }
+    refreshSyncStatus('🔄 Łączenie…');
+    try {
+      await connectSync(trimmed, onRemoteSyncUpdate);
+      refreshSyncStatus();
+      renderPlaylists();
+    } catch(e){
+      alert('Nie udało się połączyć z synchronizacją. Sprawdź połączenie z internetem i spróbuj ponownie.');
+      refreshSyncStatus();
+    }
+  });
+
+  refreshSyncStatus();
+  if(getSyncCode()){
+    connectSync(getSyncCode(), onRemoteSyncUpdate).then(() => {
+      refreshSyncStatus();
+      renderPlaylists();
+    }).catch(() => { refreshSyncStatus(); });
+  }
 
   playlistsContainer.addEventListener('click', e => {
     const delBtn = e.target.closest('button.pl-del');
