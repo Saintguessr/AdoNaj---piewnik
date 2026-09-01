@@ -53,6 +53,14 @@
   }
   .count{color:var(--muted); font-size:12px; margin-top:8px;}
 
+  /* ---------- Tabs ---------- */
+  .tabs{display:flex; gap:6px; margin-bottom:10px;}
+  .tab-btn{
+    flex:1; padding:8px 10px; border-radius:10px; border:1px solid var(--border);
+    background:var(--card2); color:var(--muted); font-size:14px; font-weight:600; cursor:pointer;
+  }
+  .tab-btn.active{background:var(--accent); color:#1e1b0a; border-color:var(--accent);}
+
   /* ---------- List ---------- */
   #list-view{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;}
   .letter-header{
@@ -72,6 +80,29 @@
   ul.songs li button:active{background:var(--card2);}
   ul.songs li button .chev{color:var(--muted); font-size:18px;}
   .empty{padding:40px 20px; text-align:center; color:var(--muted);}
+
+  /* ---------- Playlists (setlisty) pane ---------- */
+  #playlistsPane{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:calc(24px + var(--safe-bottom));}
+  .pl-toolbar{padding:4px 16px 14px;}
+  .pl-new-btn{
+    width:100%; padding:12px; border-radius:12px; border:1px dashed var(--accent);
+    background:none; color:var(--accent); font-size:15px; font-weight:700; cursor:pointer;
+  }
+  .pl-new-btn:active{background:var(--card2);}
+  ul.playlists{list-style:none; margin:0; padding:0;}
+  ul.playlists li{
+    display:flex; align-items:center; border-bottom:1px solid var(--border);
+  }
+  ul.playlists li button.pl-open{
+    flex:1; text-align:left; background:none; border:none; color:var(--text);
+    padding:14px 16px; font-size:16px; cursor:pointer; display:flex; flex-direction:column; gap:2px;
+  }
+  ul.playlists li button.pl-open:active{background:var(--card2);}
+  ul.playlists li .pl-count{color:var(--muted); font-size:12px;}
+  .pl-del{
+    background:none; border:none; color:var(--muted); font-size:20px; padding:14px 16px; cursor:pointer;
+  }
+  .pl-del:active{color:#f87171;}
 
   /* ---------- Detail view ---------- */
   #detail-view{
@@ -108,6 +139,93 @@
      instead we color whole lines that look chord-only using a class added by JS */
   .chord-line{color:var(--chord); font-weight:700;}
   .ref-line{color:#38bdf8;}
+
+  /* ---------- Add-to-setlist button (song reading header) ---------- */
+  .pl-add-btn{
+    width:34px; height:34px; border-radius:8px; border:1px solid var(--border);
+    background:var(--card2); color:var(--accent); font-size:16px; cursor:pointer; margin-right:4px;
+  }
+
+  /* ---------- Playlist detail view ---------- */
+  #playlist-detail-view, #playlist-picker-view{
+    position:fixed; inset:0; background:var(--bg); display:none; flex-direction:column; z-index:10;
+  }
+  #playlist-detail-view.open, #playlist-picker-view.open{display:flex; z-index:11;}
+  .pld-header-row{display:flex; align-items:center; gap:4px;}
+  .pld-title-btn{
+    flex:1; text-align:left; background:none; border:none; color:var(--text);
+    font-size:16px; font-weight:700; padding:8px 4px; cursor:pointer;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .pld-icon-btn{
+    background:none; border:none; color:var(--muted); font-size:18px; padding:8px; cursor:pointer;
+  }
+  .pld-icon-btn:active{color:var(--accent);}
+  #playlistSongsContainer{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;}
+  .pld-empty{padding:40px 20px; text-align:center; color:var(--muted);}
+  ul.pld-songs{list-style:none; margin:0; padding:8px 0 calc(80px + var(--safe-bottom));}
+  ul.pld-songs li{
+    display:flex; align-items:center; gap:2px; border-bottom:1px solid var(--border); padding:0 8px;
+  }
+  ul.pld-songs li .pld-num{color:var(--muted); font-size:13px; width:22px; text-align:right; flex-shrink:0;}
+  ul.pld-songs li button.pld-song-btn{
+    flex:1; text-align:left; background:none; border:none; color:var(--text);
+    padding:13px 8px; font-size:15px; cursor:pointer; min-width:0;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  ul.pld-songs li .pld-controls{display:flex; gap:2px; flex-shrink:0;}
+  ul.pld-songs li .pld-controls button{
+    width:30px; height:30px; border-radius:8px; border:1px solid var(--border);
+    background:var(--card2); color:var(--muted); font-size:14px; cursor:pointer;
+  }
+  ul.pld-songs li .pld-controls button:disabled{opacity:.3;}
+  ul.pld-songs li .pld-controls button.pld-remove{color:#f87171;}
+  .pld-add-footer{
+    position:sticky; bottom:0; padding:12px 16px calc(12px + var(--safe-bottom));
+    background:linear-gradient(0deg,var(--bg) 60%, transparent); 
+  }
+  .pld-add-btn{
+    width:100%; padding:12px; border-radius:12px; border:none;
+    background:var(--accent); color:#1e1b0a; font-size:15px; font-weight:700; cursor:pointer;
+  }
+
+  /* ---------- Playlist picker (add songs) ---------- */
+  #pickerListContainer{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;}
+  ul.picker-songs{list-style:none; margin:0; padding:0 0 calc(24px + var(--safe-bottom));}
+  ul.picker-songs li button{
+    width:100%; text-align:left; background:none; border:none; color:var(--text);
+    padding:14px 16px; font-size:16px; display:flex; align-items:center; gap:12px; cursor:pointer;
+  }
+  ul.picker-songs li button:active{background:var(--card2);}
+  .picker-check{
+    width:22px; height:22px; border-radius:6px; border:2px solid var(--border);
+    flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:14px;
+  }
+  .picker-check.checked{background:var(--accent); border-color:var(--accent); color:#1e1b0a; font-weight:700;}
+
+  /* ---------- Quick add-to-setlist modal (from song reading view) ---------- */
+  #quickAddBackdrop{
+    position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; z-index:20;
+    align-items:flex-end; justify-content:center;
+  }
+  #quickAddBackdrop.open{display:flex;}
+  #quickAddSheet{
+    width:100%; max-width:480px; background:var(--bg2); border-radius:16px 16px 0 0;
+    border:1px solid var(--border); border-bottom:none;
+    padding:16px 16px calc(16px + var(--safe-bottom)); max-height:70vh; overflow-y:auto;
+  }
+  #quickAddSheet h3{margin:0 0 12px; font-size:15px; color:var(--muted); font-weight:700;}
+  ul.quick-pl-list{list-style:none; margin:0 0 12px; padding:0;}
+  ul.quick-pl-list li button{
+    width:100%; text-align:left; background:none; border:none; color:var(--text);
+    padding:12px 4px; font-size:15px; display:flex; align-items:center; gap:12px; cursor:pointer;
+    border-bottom:1px solid var(--border);
+  }
+  .quick-new-row{display:flex; gap:8px; margin-top:4px;}
+  .quick-new-row button{
+    padding:10px 14px; border-radius:10px; border:1px dashed var(--accent);
+    background:none; color:var(--accent); font-size:14px; font-weight:700; cursor:pointer; width:100%;
+  }
 </style>
 </head>
 <body>
@@ -116,19 +234,34 @@
   <div id="list-view">
     <header>
       <h1><span class="dot"><img src="icons/icon-192.png" alt="" style="height: 30px; vertical-align: middle;"></span> Śpiewnik AdoNaj</h1>
-      <div class="search-wrap">
-        <input id="search" type="text" inputmode="search" placeholder="Szukaj tytułu pieśni…" autocomplete="off">
-        <button class="clear" id="clearBtn" aria-label="Wyczyść">×</button>
+      <div class="tabs">
+        <button class="tab-btn active" id="tabSongs" data-tab="songs">Pieśni</button>
+        <button class="tab-btn" id="tabPlaylists" data-tab="playlists">Setlisty</button>
       </div>
-      <div class="count" id="count"></div>
+      <div id="songsHeaderExtra">
+        <div class="search-wrap">
+          <input id="search" type="text" inputmode="search" placeholder="Szukaj tytułu pieśni…" autocomplete="off">
+          <button class="clear" id="clearBtn" aria-label="Wyczyść">×</button>
+        </div>
+        <div class="count" id="count"></div>
+      </div>
     </header>
-    <div id="listContainer"></div>
+    <div id="songsPane">
+      <div id="listContainer"></div>
+    </div>
+    <div id="playlistsPane" style="display:none">
+      <div class="pl-toolbar">
+        <button class="pl-new-btn" id="newPlaylistBtn">+ Nowa setlista</button>
+      </div>
+      <div id="playlistsContainer"></div>
+    </div>
   </div>
 
   <div id="detail-view">
     <div class="detail-header">
       <button class="back-btn" id="backBtn">‹ Wróć</button>
       <div class="detail-title" id="detailTitle"></div>
+      <button class="pl-add-btn" id="addToPlaylistBtn" title="Dodaj do setlisty">♫+</button>
       <div class="font-controls">
         <button id="fontMinus">A-</button>
         <button id="fontPlus">A+</button>
@@ -136,6 +269,44 @@
     </div>
     <div id="song-body-wrap">
       <pre id="song-body"></pre>
+    </div>
+  </div>
+
+  <div id="playlist-detail-view">
+    <div class="detail-header">
+      <div class="pld-header-row" style="flex:1; min-width:0;">
+        <button class="back-btn" id="pldBackBtn">‹ Wróć</button>
+        <button class="pld-title-btn" id="pldTitleBtn"></button>
+      </div>
+      <button class="pld-icon-btn" id="pldDeleteBtn" title="Usuń setlistę">🗑</button>
+    </div>
+    <div id="playlistSongsContainer"></div>
+    <div class="pld-add-footer">
+      <button class="pld-add-btn" id="pldAddSongBtn">+ Dodaj pieśń</button>
+    </div>
+  </div>
+
+  <div id="playlist-picker-view">
+    <div class="detail-header">
+      <button class="back-btn" id="pickerBackBtn">‹ Gotowe</button>
+      <div class="detail-title" id="pickerTitle">Dodaj pieśni</div>
+    </div>
+    <div style="padding:12px 16px;">
+      <div class="search-wrap">
+        <input id="pickerSearch" type="text" inputmode="search" placeholder="Szukaj tytułu pieśni…" autocomplete="off">
+        <button class="clear" id="pickerClearBtn" aria-label="Wyczyść">×</button>
+      </div>
+    </div>
+    <div id="pickerListContainer"></div>
+  </div>
+
+  <div id="quickAddBackdrop">
+    <div id="quickAddSheet">
+      <h3 id="quickAddSongTitle"></h3>
+      <ul class="quick-pl-list" id="quickAddList"></ul>
+      <div class="quick-new-row">
+        <button id="quickAddNewBtn">+ Nowa setlista z tą pieśnią</button>
+      </div>
     </div>
   </div>
 
@@ -165,7 +336,7 @@ Adorujmy Najwyższego
 F G C
 Świętą Trójcę Boga Wszechmocnego
 ` },
-	   { title: "Albowiem tak Bóg umiłował świat",
+  { title: "Albowiem tak Bóg umiłował świat",
     body: `e        D          C     h         e
 Albowiem tak Bóg umiłował świat, że Syna Jednorodzonego dał,
 e        D          C     D         e
@@ -476,194 +647,7 @@ E               H         cis       A
 Błogosławieni miłosierni,
 E               H          Fis
 albowiem oni miłosierdzia dostąpią!` },
-  { title: "Błogosławieństwo – Exodus 15",
-    body: `H                  E/H          H/Dis
-Niech Pan Cię strzeże i błogosławi 
-                       Fissus4               gis
-Rozjaśni oblicze nad tobą w miłosierdziu swym 
-                  E/H     H/Dis
-Niech twarz obróci ku tobie
-     Fissus4       H
-I pokój swój da
-
-H                  E/H          H/Dis
-Niech Pan Cię strzeże i błogosławi 
-                       Fissus4               gis
-Rozjaśni oblicze nad tobą w miłosierdziu swym 
-                  E/H     H/Dis
-Niech twarz obróci ku tobie
-     Fissus4       H
-I pokój swój da
-
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-
-H                  E/H          H/Dis
-Niech Pan Cię strzeże i błogosławi 
-                       Fissus4               gis
-Rozjaśni oblicze nad tobą w miłosierdziu swym 
-                  E/H     H/Dis
-Niech twarz obróci ku tobie
-     Fissus4       H
-I pokój swój da
-
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-
-       gis
-Niechaj Bóg cię błogosławi
-   E
-Po tysięczne pokolenie
-    H
-Twą rodzinę i twe dzieci
-       Fis/Ais
-Twoje wnuki i ich dzieci
-
-       gis
-Niechaj Bóg cię błogosławi
-   E
-Po tysięczne pokolenie
-    H
-Twą rodzinę i twe dzieci
-       Fis/Ais
-Twoje wnuki i ich dzieci
-
-       gis
-Niechaj Bóg cię błogosławi
-   E
-Po tysięczne pokolenie
-    H
-Twą rodzinę i twe dzieci
-       Fis/Ais
-Twoje wnuki i ich dzieci
-
-       gis
-Niechaj Bóg cię błogosławi
-   E
-Po tysięczne pokolenie
-    H
-Twą rodzinę i twe dzieci
-       Fis/Ais
-Twoje wnuki i ich dzieci
-
-       gis
-Niech obecność Jego Ducha
-     E
-Cię otacza i prowadzi
-    H
-Będzie w tobie i przy tobie
-        Fis/Ais
-On jest z tobą
-        Fis
-On jest z tobą
-
-    gis
-O poranku i wieczorem
-        E
-W twoim przyjściu, w twoim wyjściu
-        H
-W twoim płaczu i radości
-        Fis/Ais
-On jest z tobą
-      Fis
-I dla ciebie
-
-        gis                E
-On jest z tobą i dla ciebie
-        H                  Fis
-On jest z tobą i dla ciebie
-        gis                E
-On jest z tobą i dla ciebie
-        H                  Fis
-On jest z tobą
-
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-
-       gis
-Niechaj Bóg cię błogosławi
-   E
-Po tysięczne pokolenie
-    H
-Twą rodzinę i twe dzieci
-       Fis/Ais
-Twoje wnuki i ich dzieci
-
-       gis
-Niech obecność Jego Ducha
-     E
-Cię otacza i prowadzi
-    H
-Będzie w tobie i przy tobie
-        Fis/Ais
-On jest z tobą
-        Fis
-On jest z tobą
-
-    gis
-O poranku i wieczorem
-        E
-W twoim przyjściu, w twoim wyjściu
-        H
-W twoim płaczu i radości
-        Fis/Ais
-On jest z tobą
-      Fis
-I dla ciebie
-
-        gis                E
-On jest z tobą i dla ciebie
-        H                  Fis
-On jest z tobą i dla ciebie
-        gis                E
-On jest z tobą i dla ciebie
-        H                  Fis
-On jest z tobą
-
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen` },
-
-	    { title: "Bóg nad swym ludem zmiłował się",
+  { title: "Bóg nad swym ludem zmiłował się",
     body: `1.
 e          a         H       e
 Bóg nad swym ludem zmiłował się
@@ -727,7 +711,6 @@ D7      G       a         G e
 Chryste, króluj, Chryste, zwyciężaj,
         C          D        G        H7
 Swoją miłość odnów w nas. /2x` },
-	  
   { title: "Chlebie najcichszy",
     body: `G       D           C                   D
 Chlebie najcichszy, otul mnie swym milczeniem.
@@ -1685,8 +1668,7 @@ C
 Życiodajny spłynie deszcz na spragnione serce,
 a h
 Obmyj mnie i uświęć mnie;
-e C H7
-Uwielbienia niech popłynie pieśń!  x2				
+Uwielbienia niech popłynie pieśń!  x2				e CH7
 C G
 Chwała Jezusowi, który za mnie życie dał!
 C G
@@ -2510,103 +2492,7 @@ Gdy o Jego ramię oprę się.
 W Nim nadzieję mam, uleciał strach.
 On najbliżej jest, zawsze troszczy się.
 Królów Król, z nami Bóg. /2x		 Jezus. /4x` },
-  { title: "Psalm 63 – AdoNaj",
-    body: `
-	 
-D     	  A 	G		D
- h     		A            G D
-Ref.
-D     	  A 	G		D
-Boże, mój Boże, Ciebie szukam;
-    h     		A            G D
-I Ciebie pragnie moja dusza
-D     	A               	G  A 	h
-Boże, mój Boże, Ciebie szukam;
-    G    	 D	            A    D
-I Ciebie pragnie moja dusza
-	
-1.
-D A h
-za Tobą tęskni dusza, ciało me,
-G A D
-jak zeschła ziemia bez wody spragniona.
-D A h fis
-W świątyni patrzę na oblicze Twe,
-G D A
-Twoja potęga niech będzie ogłoszona!
-D A h
-Skoro Twa łaska lepsza jest od życia,
-G A D
-to moje wargi będą Ciebie sławić.
-D A h fis
-Tak błogosławię Ciebie w moim życiu:
-G D A
-I wzniosę ręce, by  Ciebie błogosławić.
-
-Ref.
-D     	  A 	G		D
-Boże, mój Boże, Ciebie szukam;
-    h     		A            G D
-I Ciebie pragnie moja dusza
-D     	A               	G  A 	h
-Boże, mój Boże, Ciebie szukam;
-    G    	 D	            A    D
-I Ciebie pragnie moja dusza
-
-2.
-D A h
-Będę się cieszył, jak w wesołe święta
-G A D
-radosnym śpiewem napełnię me usta,
-D A h fis
-gdy wspomnę Ciebie na moim posłaniu
-G D A
-myślę o Tobie podczas moich czuwań.
-D A h
-Dla mnie się stałeś jedyną pomocą
-G A D
-w cieniu Twych skrzydeł wołać chce z radości:
-D A h fis
-do Ciebie przylgnąć pragnę z całą mocą
-G D A
-prawica Twoja wspiera mnie w słabości.
-
-Ref.
-D     	  A 	G		D
-Boże, mój Boże, Ciebie szukam;
-    h     		A            G D
-I Ciebie pragnie moja dusza
-D     	A               	G  A 	h
-Boże, mój Boże, Ciebie szukam;
-    G    	 D	            A    D
-I Ciebie pragnie moja dusza
-
-[Bridge]
-D A h
-A wszyscy, którzy czyhają na me życie,
-G A D
-niech zejdą w głębiny ziemi.
-D A h fis
-będą wydani pod siekące miecze
-G D A
-Oni się staną łupem dla szakali.
-D A h fis
-Kto Bogu ufa, niech się w Nim raduje
-G D A
-A niech ucichnie, kto nie chce Go chwalić.
-
-Ref.
-D     	  A 	G		D
-Boże, mój Boże, Ciebie szukam;
-    h     		A            G D
-I Ciebie pragnie moja dusza
-D     	A               	G  A 	h
-Boże, mój Boże, Ciebie szukam;
-    G    	 D	            A    D
-I Ciebie pragnie moja dusza
-
-` },
-	   { title: "Psalm 126 - niemaGotu",
+  { title: "Psalm 126 - niemaGotu",
     body: `1.
 fis         cis          H         A           E
 Gdy Pan odmienił los Syjonu, wydawało się nam, że śnimy!
@@ -2754,6 +2640,102 @@ Przez wszystkie wieki wieków. Amen.
 Ref.
 a   G   F   E a
 Alleluja /4x` },
+  { title: "Psalm 63 – AdoNaj",
+    body: `
+	 
+D     	  A 	G		D
+ h     		A            G D
+Ref.
+D     	  A 	G		D
+Boże, mój Boże, Ciebie szukam;
+    h     		A            G D
+I Ciebie pragnie moja dusza
+D     	A               	G  A 	h
+Boże, mój Boże, Ciebie szukam;
+    G    	 D	            A    D
+I Ciebie pragnie moja dusza
+	
+1.
+D A h
+za Tobą tęskni dusza, ciało me,
+G A D
+jak zeschła ziemia bez wody spragniona.
+D A h fis
+W świątyni patrzę na oblicze Twe,
+G D A
+Twoja potęga niech będzie ogłoszona!
+D A h
+Skoro Twa łaska lepsza jest od życia,
+G A D
+to moje wargi będą Ciebie sławić.
+D A h fis
+Tak błogosławię Ciebie w moim życiu:
+G D A
+I wzniosę ręce, by  Ciebie błogosławić.
+
+Ref.
+D     	  A 	G		D
+Boże, mój Boże, Ciebie szukam;
+    h     		A            G D
+I Ciebie pragnie moja dusza
+D     	A               	G  A 	h
+Boże, mój Boże, Ciebie szukam;
+    G    	 D	            A    D
+I Ciebie pragnie moja dusza
+
+2.
+D A h
+Będę się cieszył, jak w wesołe święta
+G A D
+radosnym śpiewem napełnię me usta,
+D A h fis
+gdy wspomnę Ciebie na moim posłaniu
+G D A
+myślę o Tobie podczas moich czuwań.
+D A h
+Dla mnie się stałeś jedyną pomocą
+G A D
+w cieniu Twych skrzydeł wołać chce z radości:
+D A h fis
+do Ciebie przylgnąć pragnę z całą mocą
+G D A
+prawica Twoja wspiera mnie w słabości.
+
+Ref.
+D     	  A 	G		D
+Boże, mój Boże, Ciebie szukam;
+    h     		A            G D
+I Ciebie pragnie moja dusza
+D     	A               	G  A 	h
+Boże, mój Boże, Ciebie szukam;
+    G    	 D	            A    D
+I Ciebie pragnie moja dusza
+
+[Bridge]
+D A h
+A wszyscy, którzy czyhają na me życie,
+G A D
+niech zejdą w głębiny ziemi.
+D A h fis
+będą wydani pod siekące miecze
+G D A
+Oni się staną łupem dla szakali.
+D A h fis
+Kto Bogu ufa, niech się w Nim raduje
+G D A
+A niech ucichnie, kto nie chce Go chwalić.
+
+Ref.
+D     	  A 	G		D
+Boże, mój Boże, Ciebie szukam;
+    h     		A            G D
+I Ciebie pragnie moja dusza
+D     	A               	G  A 	h
+Boże, mój Boże, Ciebie szukam;
+    G    	 D	            A    D
+I Ciebie pragnie moja dusza
+
+` },
   { title: "Rozpięty na ramionach",
     body: `a C G F a E
 Ref. Rozpięty na ramionach jak sokół na niebie
@@ -3896,6 +3878,33 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
   const backBtn = document.getElementById('backBtn');
   const fontMinus = document.getElementById('fontMinus');
   const fontPlus = document.getElementById('fontPlus');
+  const addToPlaylistBtn = document.getElementById('addToPlaylistBtn');
+
+  const tabSongs = document.getElementById('tabSongs');
+  const tabPlaylists = document.getElementById('tabPlaylists');
+  const songsHeaderExtra = document.getElementById('songsHeaderExtra');
+  const songsPane = document.getElementById('songsPane');
+  const playlistsPane = document.getElementById('playlistsPane');
+  const playlistsContainer = document.getElementById('playlistsContainer');
+  const newPlaylistBtn = document.getElementById('newPlaylistBtn');
+
+  const playlistDetailView = document.getElementById('playlist-detail-view');
+  const pldBackBtn = document.getElementById('pldBackBtn');
+  const pldTitleBtn = document.getElementById('pldTitleBtn');
+  const pldDeleteBtn = document.getElementById('pldDeleteBtn');
+  const playlistSongsContainer = document.getElementById('playlistSongsContainer');
+  const pldAddSongBtn = document.getElementById('pldAddSongBtn');
+
+  const playlistPickerView = document.getElementById('playlist-picker-view');
+  const pickerBackBtn = document.getElementById('pickerBackBtn');
+  const pickerListContainer = document.getElementById('pickerListContainer');
+  const pickerSearch = document.getElementById('pickerSearch');
+  const pickerClearBtn = document.getElementById('pickerClearBtn');
+
+  const quickAddBackdrop = document.getElementById('quickAddBackdrop');
+  const quickAddSongTitle = document.getElementById('quickAddSongTitle');
+  const quickAddList = document.getElementById('quickAddList');
+  const quickAddNewBtn = document.getElementById('quickAddNewBtn');
 
   function normalize(s){
     return s.toLowerCase()
@@ -3904,6 +3913,14 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
   }
 
   const songsIndexed = SONGS.map((s,i) => ({...s, idx:i, norm: normalize(s.title)}));
+  const titleToIdx = {};
+  songsIndexed.forEach(s => { titleToIdx[s.title] = s.idx; });
+
+  function escapeHtml(str){
+    return str.replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
 
   function render(filterText){
     const q = normalize(filterText || '');
@@ -3934,12 +3951,6 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     listContainer.innerHTML = html;
   }
 
-  function escapeHtml(str){
-    return str.replace(/[&<>"']/g, c => ({
-      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-    }[c]));
-  }
-
   // Heuristic: a line is a "chord line" if, once split on whitespace, every
   // token looks like a chord symbol. Supports both major (uppercase root,
   // e.g. G, C7, D/Fis) and Polish minor notation (lowercase root, e.g.
@@ -3960,7 +3971,29 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     return /^\s*(Ref\.?|Refren|REFREN|Bridge|BRIDGE|Coda)\b/i.test(line);
   }
 
+  // ---------- Overlay stack: keeps every full-screen view / sheet in sync
+  // with browser history so the hardware/software back button always closes
+  // exactly the thing currently on top, however deep the user navigated. ----------
+  const overlayStack = [];
+  function openOverlay(el){
+    el.classList.add('open');
+    overlayStack.push(el);
+    history.pushState({n: overlayStack.length}, '');
+  }
+  function closeTopOverlay(){
+    const el = overlayStack.pop();
+    if(el) el.classList.remove('open');
+  }
+  window.addEventListener('popstate', (e) => {
+    const target = (e.state && e.state.n) || 0;
+    while(overlayStack.length > target){ closeTopOverlay(); }
+  });
+  function goBack(){ history.back(); }
+
+  // ---------- Song reading view ----------
+  let currentSongIdx = null;
   function openSong(idx){
+    currentSongIdx = idx;
     const s = SONGS[idx];
     detailTitle.textContent = s.title;
     const lines = s.body.split('\n');
@@ -3975,14 +4008,8 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
       if(i < lines.length - 1) frag.appendChild(document.createTextNode('\n'));
     });
     songBody.appendChild(frag);
-    detailView.classList.add('open');
     document.getElementById('song-body-wrap').scrollTop = 0;
-    history.pushState({song:idx}, '', '#song-' + idx);
-  }
-
-  function closeSong(){
-    detailView.classList.remove('open');
-    if(location.hash.startsWith('#song-')) history.back();
+    openOverlay(detailView);
   }
 
   listContainer.addEventListener('click', e => {
@@ -3990,8 +4017,7 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     if(btn) openSong(parseInt(btn.dataset.idx,10));
   });
 
-  backBtn.addEventListener('click', closeSong);
-  window.addEventListener('popstate', () => { detailView.classList.remove('open'); });
+  backBtn.addEventListener('click', goBack);
 
   searchInput.addEventListener('input', () => {
     clearBtn.style.display = searchInput.value ? 'block' : 'none';
@@ -4012,6 +4038,291 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
   fontMinus.addEventListener('click', () => { fontSize = Math.max(11, fontSize-1); applyFont(); });
   fontPlus.addEventListener('click', () => { fontSize = Math.min(26, fontSize+1); applyFont(); });
   applyFont();
+
+  // ---------- Tabs: Pieśni / Setlisty ----------
+  tabSongs.addEventListener('click', () => {
+    tabSongs.classList.add('active'); tabPlaylists.classList.remove('active');
+    songsPane.style.display = ''; playlistsPane.style.display = 'none';
+    songsHeaderExtra.style.display = '';
+  });
+  tabPlaylists.addEventListener('click', () => {
+    tabPlaylists.classList.add('active'); tabSongs.classList.remove('active');
+    playlistsPane.style.display = ''; songsPane.style.display = 'none';
+    songsHeaderExtra.style.display = 'none';
+    renderPlaylists();
+  });
+
+  // ---------- Playlists (setlisty) data layer ----------
+  function loadPlaylists(){
+    try {
+      const raw = localStorage.getItem('spiewnik_playlists');
+      return raw ? JSON.parse(raw) : [];
+    } catch(e){ return []; }
+  }
+  function savePlaylists(list){
+    try { localStorage.setItem('spiewnik_playlists', JSON.stringify(list)); } catch(e){}
+  }
+  function genId(){
+    return 'pl_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  }
+  function getPlaylist(id){
+    return loadPlaylists().find(p => p.id === id) || null;
+  }
+  function updatePlaylist(id, mutateFn){
+    const lists = loadPlaylists();
+    const pl = lists.find(p => p.id === id);
+    if(!pl) return;
+    mutateFn(pl);
+    savePlaylists(lists);
+  }
+
+  function renderPlaylists(){
+    const lists = loadPlaylists();
+    if(lists.length === 0){
+      playlistsContainer.innerHTML = '<div class="empty">Brak setlist. Utwórz pierwszą powyżej.</div>';
+      return;
+    }
+    let html = '<ul class="playlists">';
+    lists.forEach(pl => {
+      html += '<li>'
+        + '<button class="pl-open" data-id="' + pl.id + '">'
+        + '<span>' + escapeHtml(pl.name) + '</span>'
+        + '<span class="pl-count">' + pl.songs.length + ' pieśni</span>'
+        + '</button>'
+        + '<button class="pl-del" data-id="' + pl.id + '">✕</button>'
+        + '</li>';
+    });
+    html += '</ul>';
+    playlistsContainer.innerHTML = html;
+  }
+
+  newPlaylistBtn.addEventListener('click', () => {
+    const name = prompt('Nazwa nowej setlisty:');
+    if(!name || !name.trim()) return;
+    const lists = loadPlaylists();
+    const pl = { id: genId(), name: name.trim(), songs: [] };
+    lists.push(pl);
+    savePlaylists(lists);
+    renderPlaylists();
+    openPlaylistDetail(pl.id);
+  });
+
+  playlistsContainer.addEventListener('click', e => {
+    const delBtn = e.target.closest('button.pl-del');
+    if(delBtn){
+      const id = delBtn.dataset.id;
+      const pl = getPlaylist(id);
+      if(pl && confirm('Usunąć setlistę "' + pl.name + '"?')){
+        savePlaylists(loadPlaylists().filter(p => p.id !== id));
+        renderPlaylists();
+      }
+      return;
+    }
+    const openBtn = e.target.closest('button.pl-open');
+    if(openBtn) openPlaylistDetail(openBtn.dataset.id);
+  });
+
+  // ---------- Playlist detail (setlist contents, reorder, remove) ----------
+  let currentPlaylistId = null;
+
+  function openPlaylistDetail(id){
+    currentPlaylistId = id;
+    renderPlaylistDetailHeader();
+    renderPlaylistSongs();
+    openOverlay(playlistDetailView);
+  }
+  function renderPlaylistDetailHeader(){
+    const pl = getPlaylist(currentPlaylistId);
+    pldTitleBtn.textContent = pl ? pl.name : '';
+  }
+  function renderPlaylistSongs(){
+    const pl = getPlaylist(currentPlaylistId);
+    if(!pl){ playlistSongsContainer.innerHTML = ''; return; }
+    if(pl.songs.length === 0){
+      playlistSongsContainer.innerHTML = '<div class="pld-empty">Brak pieśni w tej setliście. Dodaj je przyciskiem poniżej.</div>';
+      return;
+    }
+    let html = '<ul class="pld-songs">';
+    pl.songs.forEach((title, i) => {
+      const idx = titleToIdx[title];
+      const known = idx !== undefined;
+      html += '<li>'
+        + '<span class="pld-num">' + (i+1) + '.</span>'
+        + '<button class="pld-song-btn"' + (known ? ' data-idx="'+idx+'"' : ' disabled style="opacity:.4"') + '>' + escapeHtml(title) + '</button>'
+        + '<span class="pld-controls">'
+        + '<button class="pld-up" data-i="' + i + '"' + (i===0?' disabled':'') + '>↑</button>'
+        + '<button class="pld-down" data-i="' + i + '"' + (i===pl.songs.length-1?' disabled':'') + '>↓</button>'
+        + '<button class="pld-remove" data-i="' + i + '">✕</button>'
+        + '</span>'
+        + '</li>';
+    });
+    html += '</ul>';
+    playlistSongsContainer.innerHTML = html;
+  }
+
+  playlistSongsContainer.addEventListener('click', e => {
+    const upBtn = e.target.closest('button.pld-up');
+    const downBtn = e.target.closest('button.pld-down');
+    const remBtn = e.target.closest('button.pld-remove');
+    const songBtn = e.target.closest('button.pld-song-btn');
+    if(upBtn){
+      const i = parseInt(upBtn.dataset.i,10);
+      updatePlaylist(currentPlaylistId, pl => {
+        if(i>0){ const tmp = pl.songs[i-1]; pl.songs[i-1]=pl.songs[i]; pl.songs[i]=tmp; }
+      });
+      renderPlaylistSongs();
+      return;
+    }
+    if(downBtn){
+      const i = parseInt(downBtn.dataset.i,10);
+      updatePlaylist(currentPlaylistId, pl => {
+        if(i<pl.songs.length-1){ const tmp = pl.songs[i+1]; pl.songs[i+1]=pl.songs[i]; pl.songs[i]=tmp; }
+      });
+      renderPlaylistSongs();
+      return;
+    }
+    if(remBtn){
+      const i = parseInt(remBtn.dataset.i,10);
+      updatePlaylist(currentPlaylistId, pl => { pl.songs.splice(i,1); });
+      renderPlaylistSongs();
+      renderPlaylistDetailHeader();
+      return;
+    }
+    if(songBtn && songBtn.dataset.idx !== undefined){
+      openSong(parseInt(songBtn.dataset.idx,10));
+    }
+  });
+
+  pldBackBtn.addEventListener('click', goBack);
+
+  pldTitleBtn.addEventListener('click', () => {
+    const pl = getPlaylist(currentPlaylistId);
+    if(!pl) return;
+    const name = prompt('Nowa nazwa setlisty:', pl.name);
+    if(!name || !name.trim()) return;
+    updatePlaylist(currentPlaylistId, p => { p.name = name.trim(); });
+    renderPlaylistDetailHeader();
+    renderPlaylists();
+  });
+
+  pldDeleteBtn.addEventListener('click', () => {
+    const pl = getPlaylist(currentPlaylistId);
+    if(!pl) return;
+    if(confirm('Usunąć setlistę "' + pl.name + '"?')){
+      savePlaylists(loadPlaylists().filter(p => p.id !== currentPlaylistId));
+      renderPlaylists();
+      goBack();
+    }
+  });
+
+  pldAddSongBtn.addEventListener('click', () => {
+    openPicker();
+  });
+
+  // ---------- Picker: search + toggle songs into the current setlist ----------
+  function renderPicker(filterText){
+    const pl = getPlaylist(currentPlaylistId);
+    if(!pl) return;
+    const q = normalize(filterText || '');
+    const filtered = q ? songsIndexed.filter(s => s.norm.includes(q)) : songsIndexed;
+    if(filtered.length === 0){
+      pickerListContainer.innerHTML = '<div class="empty">Brak wyników.</div>';
+      return;
+    }
+    let html = '<ul class="picker-songs">';
+    filtered.forEach(s => {
+      const inList = pl.songs.includes(s.title);
+      html += '<li><button data-title="' + escapeHtml(s.title) + '">'
+        + '<span class="picker-check' + (inList?' checked':'') + '">' + (inList?'✓':'') + '</span>'
+        + '<span>' + escapeHtml(s.title) + '</span>'
+        + '</button></li>';
+    });
+    html += '</ul>';
+    pickerListContainer.innerHTML = html;
+  }
+
+  function openPicker(){
+    pickerSearch.value = '';
+    pickerClearBtn.style.display = 'none';
+    renderPicker('');
+    openOverlay(playlistPickerView);
+  }
+
+  pickerListContainer.addEventListener('click', e => {
+    const btn = e.target.closest('button[data-title]');
+    if(!btn) return;
+    const title = btn.dataset.title;
+    updatePlaylist(currentPlaylistId, pl => {
+      const i = pl.songs.indexOf(title);
+      if(i === -1) pl.songs.push(title); else pl.songs.splice(i,1);
+    });
+    renderPicker(pickerSearch.value);
+    renderPlaylistSongs();
+    renderPlaylistDetailHeader();
+  });
+
+  pickerSearch.addEventListener('input', () => {
+    pickerClearBtn.style.display = pickerSearch.value ? 'block' : 'none';
+    renderPicker(pickerSearch.value);
+  });
+  pickerClearBtn.addEventListener('click', () => {
+    pickerSearch.value = '';
+    pickerClearBtn.style.display = 'none';
+    renderPicker('');
+    pickerSearch.focus();
+  });
+  pickerBackBtn.addEventListener('click', goBack);
+
+  // ---------- Quick "add current song to a setlist" sheet (from reading view) ----------
+  function renderQuickAdd(){
+    if(currentSongIdx === null) return;
+    const title = SONGS[currentSongIdx].title;
+    quickAddSongTitle.textContent = 'Dodaj „' + title + '" do:';
+    const lists = loadPlaylists();
+    if(lists.length === 0){
+      quickAddList.innerHTML = '<li style="padding:8px 4px; color:var(--muted); font-size:14px;">Nie masz jeszcze żadnej setlisty.</li>';
+      return;
+    }
+    let html = '';
+    lists.forEach(pl => {
+      const inList = pl.songs.includes(title);
+      html += '<li><button data-id="' + pl.id + '">'
+        + '<span class="picker-check' + (inList?' checked':'') + '">' + (inList?'✓':'') + '</span>'
+        + '<span>' + escapeHtml(pl.name) + '</span>'
+        + '</button></li>';
+    });
+    quickAddList.innerHTML = html;
+  }
+  function openQuickAdd(){
+    if(currentSongIdx === null) return;
+    renderQuickAdd();
+    openOverlay(quickAddBackdrop);
+  }
+
+  addToPlaylistBtn.addEventListener('click', openQuickAdd);
+  quickAddBackdrop.addEventListener('click', e => {
+    if(e.target === quickAddBackdrop) goBack();
+  });
+  quickAddList.addEventListener('click', e => {
+    const btn = e.target.closest('button[data-id]');
+    if(!btn || currentSongIdx === null) return;
+    const title = SONGS[currentSongIdx].title;
+    updatePlaylist(btn.dataset.id, pl => {
+      const i = pl.songs.indexOf(title);
+      if(i === -1) pl.songs.push(title); else pl.songs.splice(i,1);
+    });
+    renderQuickAdd();
+  });
+  quickAddNewBtn.addEventListener('click', () => {
+    if(currentSongIdx === null) return;
+    const name = prompt('Nazwa nowej setlisty:');
+    if(!name || !name.trim()) return;
+    const title = SONGS[currentSongIdx].title;
+    const lists = loadPlaylists();
+    lists.push({ id: genId(), name: name.trim(), songs: [title] });
+    savePlaylists(lists);
+    renderQuickAdd();
+  });
 
   render('');
 
