@@ -1,9 +1,10 @@
-const CACHE_NAME = 'spiewnik-cache-v1';
+const CACHE_NAME = 'spiewnik-cache-v2';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icons/icon-192.png',
+  './icons/icon-190.png',
   './icons/icon-512.png'
 ];
 
@@ -23,13 +24,20 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
+// Network-first: always fetch the freshest version when online (this is
+// what index.html itself needs, since ALL app logic and song data lives
+// there - a cache-first strategy previously meant new deploys could go
+// completely unnoticed by already-installed devices). Falls back to the
+// last cached copy only when the network request actually fails
+// (genuinely offline use).
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(resp => {
+    fetch(event.request)
+      .then(resp => {
+        const respClone = resp.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, respClone));
         return resp;
-      }).catch(() => cached);
-    })
+      })
+      .catch(() => caches.match(event.request))
   );
 });
