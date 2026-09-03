@@ -109,9 +109,9 @@
   }
   .pl-del:active{color:#f87171;}
 
-  /* ---------- Detail view ---------- */
+  /* ---------- Detail view (Z-INDEX POPRAWIONY NA 20) ---------- */
   #detail-view{
-    position:fixed; inset:0; background:var(--bg); display:none; flex-direction:column; z-index:10;
+    position:fixed; inset:0; background:var(--bg); display:none; flex-direction:column; z-index:20;
   }
   #detail-view.open{display:flex;}
   .detail-header{
@@ -140,12 +140,10 @@
     font-size:15px; line-height:1.55; white-space:pre; overflow-x:auto;
     tab-size:4; -moz-tab-size:4;
   }
-  /* chord-looking tokens (heuristic highlight) are wrapped server-side via span.chordline is not used;
-     instead we color whole lines that look chord-only using a class added by JS */
   .chord-line{color:var(--chord); font-weight:700;}
   .ref-line{color:#38bdf8;}
 
-  /* ---------- Add-to-setlist button (song reading header) ---------- */
+  /* ---------- Add-to-setlist button ---------- */
   .pl-add-btn{
     width:34px; height:34px; border-radius:8px; border:1px solid var(--border);
     background:var(--card2); color:var(--accent); font-size:16px; cursor:pointer; margin-right:4px;
@@ -155,7 +153,9 @@
   #playlist-detail-view, #playlist-picker-view{
     position:fixed; inset:0; background:var(--bg); display:none; flex-direction:column; z-index:10;
   }
-  #playlist-detail-view.open, #playlist-picker-view.open{display:flex; z-index:11;}
+  #playlist-detail-view.open{display:flex; z-index:10;}
+  #playlist-picker-view.open{display:flex; z-index:15;}
+
   .pld-header-row{display:flex; align-items:center; gap:4px;}
   .pld-title-btn{
     flex:1; text-align:left; background:none; border:none; color:var(--text);
@@ -208,9 +208,9 @@
   }
   .picker-check.checked{background:var(--accent); border-color:var(--accent); color:#1e1b0a; font-weight:700;}
 
-  /* ---------- Quick add-to-setlist modal (from song reading view) ---------- */
+  /* ---------- Quick add-to-setlist modal ---------- */
   #quickAddBackdrop{
-    position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; z-index:20;
+    position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; z-index:30;
     align-items:flex-end; justify-content:center;
   }
   #quickAddBackdrop.open{display:flex;}
@@ -232,10 +232,9 @@
     background:none; color:var(--accent); font-size:14px; font-weight:700; cursor:pointer; width:100%;
   }
 
-  /* ---------- Custom dialog (replaces native prompt/confirm/alert, which
-     are unreliable inside an installed/standalone PWA on many phones) ---------- */
+  /* ---------- Custom dialog ---------- */
   #customDialogBackdrop{
-    position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; z-index:30;
+    position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; z-index:40;
     align-items:center; justify-content:center; padding:20px;
   }
   #customDialogBackdrop.open{display:flex;}
@@ -375,7 +374,6 @@
 </div>
 
 <script type="module">
-  // ---------- Firebase (cross-device setlist sync) ----------
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
   import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
@@ -431,7 +429,7 @@
       const remote = (snap2.data() && snap2.data().playlists) || [];
       localStorage.setItem('spiewnik_playlists', JSON.stringify(remote));
       onRemoteUpdate(remote);
-    }, () => { /* connection error - ignore, local copy remains authoritative */ });
+    }, () => {});
   }
 
   function disconnectSync(){
@@ -446,10 +444,9 @@
       await ensureAuth();
       const ref = doc(fbDb, 'syncs', code);
       await setDoc(ref, { playlists: list, updatedAt: Date.now() });
-    } catch(e){ /* offline / blocked - local copy already saved, will retry on next change */ }
+    } catch(e){}
   }
 
-  // ---------- Main app ----------
 (function(){
   const SONGS = [
   { title: "Adorujmy Najwyższego - AdoNaj",
@@ -464,9 +461,7 @@ Jego Syna Zbawiciela naszego
 a E
 Adorujmy Najwyższego
 F G E a
-Ducha Ognia, Parakleta, Świętego
-
-` },
+Ducha Ognia, Parakleta, Świętego` },
   { title: "Albowiem tak Bóg umiłował świat",
     body: `e        D          C     h         e
 Albowiem tak Bóg umiłował świat, że Syna Jednorodzonego dał,
@@ -788,174 +783,6 @@ Niech twarz obróci ku tobie
      Fissus4       H
 I pokój swój da
 
-H                  E/H          H/Dis
-Niech Pan Cię strzeże i błogosławi 
-                       Fissus4               gis
-Rozjaśni oblicze nad tobą w miłosierdziu swym 
-                  E/H     H/Dis
-Niech twarz obróci ku tobie
-     Fissus4       H
-I pokój swój da
-
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-
-H                  E/H          H/Dis
-Niech Pan Cię strzeże i błogosławi 
-                       Fissus4               gis
-Rozjaśni oblicze nad tobą w miłosierdziu swym 
-                  E/H     H/Dis
-Niech twarz obróci ku tobie
-     Fissus4       H
-I pokój swój da
-
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-
-       gis
-Niechaj Bóg cię błogosławi
-   E
-Po tysięczne pokolenie
-    H
-Twą rodzinę i twe dzieci
-       Fis/Ais
-Twoje wnuki i ich dzieci
-
-       gis
-Niechaj Bóg cię błogosławi
-   E
-Po tysięczne pokolenie
-    H
-Twą rodzinę i twe dzieci
-       Fis/Ais
-Twoje wnuki i ich dzieci
-
-       gis
-Niechaj Bóg cię błogosławi
-   E
-Po tysięczne pokolenie
-    H
-Twą rodzinę i twe dzieci
-       Fis/Ais
-Twoje wnuki i ich dzieci
-
-       gis
-Niechaj Bóg cię błogosławi
-   E
-Po tysięczne pokolenie
-    H
-Twą rodzinę i twe dzieci
-       Fis/Ais
-Twoje wnuki i ich dzieci
-
-       gis
-Niech obecność Jego Ducha
-     E
-Cię otacza i prowadzi
-    H
-Będzie w tobie i przy tobie
-        Fis/Ais
-On jest z tobą
-        Fis
-On jest z tobą
-
-    gis
-O poranku i wieczorem
-        E
-W twoim przyjściu, w twoim wyjściu
-        H
-W twoim płaczu i radości
-        Fis/Ais
-On jest z tobą
-      Fis
-I dla ciebie
-
-        gis                E
-On jest z tobą i dla ciebie
-        H                  Fis
-On jest z tobą i dla ciebie
-        gis                E
-On jest z tobą i dla ciebie
-        H                  Fis
-On jest z tobą
-
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-
-       gis
-Niechaj Bóg cię błogosławi
-   E
-Po tysięczne pokolenie
-    H
-Twą rodzinę i twe dzieci
-       Fis/Ais
-Twoje wnuki i ich dzieci
-
-       gis
-Niech obecność Jego Ducha
-     E
-Cię otacza i prowadzi
-    H
-Będzie w tobie i przy tobie
-        Fis/Ais
-On jest z tobą
-        Fis
-On jest z tobą
-
-    gis
-O poranku i wieczorem
-        E
-W twoim przyjściu, w twoim wyjściu
-        H
-W twoim płaczu i radości
-        Fis/Ais
-On jest z tobą
-      Fis
-I dla ciebie
-
-        gis                E
-On jest z tobą i dla ciebie
-        H                  Fis
-On jest z tobą i dla ciebie
-        gis                E
-On jest z tobą i dla ciebie
-        H                  Fis
-On jest z tobą
-
 gis      E
 A - a - amen
 H   Fis
@@ -979,54 +806,6 @@ Ref.
 D7      G       a         G e
 Chryste, króluj, Chryste, zwyciężaj,
         C          D        G        H7
-Swoją miłość odnów w nas. /2x
-
-2.
-e          a           H       e
-Miłość Chrystusa przemienia świat,
-a         C          G     H
-Wyznacza szlaki wciąż nowe.
-e         a          H7       e
-Kruszy nienawiść, wprowadza ład,
-C          a          G    D
-Jednoczy z ludźmi i z Bogiem.
-
-Ref.
-D7      G       a         G e
-Chryste, króluj, Chryste, zwyciężaj,
-        C          D        G        H7
-Swoją miłość odnów w nas. /2x
-
-3.
-e          a        H       e
-W miłości swojej zachowaj nas,
-a        C         G     H
-Chryste, Zwycięzco i Panie.
-e        a          H7       e
-Niech upragniony nadejdzie czas
-C        a       G    D
-Odnowy i pojednania.
-
-Ref.
-D7      G       a         G e
-Chryste, króluj, Chryste, zwyciężaj,
-        C          D        G        H7
-Swoją miłość odnów w nas. /2x
-
-4.
-e          a        H       e
-Na straży Bogu oddanych serc
-a       C          G     H
-Matka Kościoła trwa wiernie.
-e         a         H7      e
-W Jej dłonie złóżmy nadzieje swe,
-C       a         G     D
-A Ona wspierać nas będzie.
-
-Ref.
-D7      G       a         G e
-Chryste, króluj, Chryste, zwyciężaj,
-        C          D        G        H7
 Swoją miłość odnów w nas. /2x` },
   { title: "Chlebie najcichszy",
     body: `G       D           C                   D
@@ -1042,22 +821,7 @@ Przemień mnie w siebie, bym jak Ty stał się chlebem
 e           C         G               D
 Pobłogosław mnie, połam, rozdaj łaknącym braciom
 e           C         G               D
-Pobłogosław mnie, połam, rozdaj łaknącym braciom
-
-G       D           C                   D
-Chlebie najcichszy, otul mnie swym milczeniem.
-G           D       a                    e
-Ukryj mnie w Twojej bieli, wchłoń moją ciemność.
-
-2.
-e          C               G         D
-A ułomki chleba, które zostaną
-e          C               G         D
-A ułomki chleba, które zostaną
-e          C           G                 D
-Rozdaj tym, którzy nie wierzą w swój głód
-e          C           G                 D
-Rozdaj tym, którzy nie wierzą w swój głód.` },
+Pobłogosław mnie, połam, rozdaj łaknącym braciom` },
   { title: "Chrystus Pan, Boży Syn",
     body: `G            e             a7         D7
 Chrystus Pan Boży Syn, Zbawca nasz zgodził się
@@ -1088,32 +852,7 @@ Refren:
 D           e        A          D
 Panie nasz, króluj nam! Boże nasz, króluj nam!
 D             e          A           D
-Poprzez wieczny czas króluj, Jezu, nam!
-
-2.
-D           e            A            D
-W Serca Twego ranie, o serc naszych Królu,
-D           e        A          D
-pokój i wytrwanie, ukojenie w bólu.
-
-Refren:
-D           e        A          D
-Panie nasz, króluj nam! Boże nasz, króluj nam!
-D             e          A           D
-Poprzez wieczny czas króluj, Jezu, nam!
-
-3.
-D           e            A            D
-Ty nas wspieraj w znoju, strzeż przez życie całe,
-D           e            A            D
-byśmy w serc pokoju Twą wielbili chwałę.
-
-Refren:
-D           e        A          D
-Panie nasz, króluj nam! Boże nasz, króluj nam!
-D             e          A           D
-Poprzez wieczny czas króluj, Jezu, nam!
-Ref.` },
+Poprzez wieczny czas króluj, Jezu, nam!` },
   { title: "Credo / W to wierzę",
     body: `1.
 G
@@ -1145,129 +884,20 @@ G
 h
 Wyznaję to
 G          A
-Wierzę w imię Jezus
-G A G A
-
-2.
-G
-Nasz Sędzio, nasz Obrońco
-A
-Cierpiałeś za nasz grzech
-G          A
-A nam przebaczono
-G
-Ty zszedłeś do ciemności
-A
-I w chwale wzniosłeś się
-G          A
-Zająłeś w niebie tron
-
-Refren 1
-D
-Tak, ja wierzę w Boga Ojca
-G
-W Syna, którym Jezus jest
-h
-Wierzę też w Świętego Ducha
-G
-Bóg jest w osobach trzech
-D
-Wierzę także w zmartwychwstanie
-G
-Że powstaniemy znów
-h
-Wyznaję to
-G          A
-Wierzę w imię Jezus
-
-Bridge
-D        G        A
-Wierzę, że Bóg jest
-G        A
-Wierzę, że pokonał śmierć
-G        A          D
-Wierzę, że to Chrystus Panem jest /2x
-
-Refren 2
-D
-Wierzę, że jest życie wieczne
-G
-Że na ziemię przyszedł Bóg
-h
-Wierzę we wspólnotę świętych
-G
-I święty Kościół Twój
-D
-Wierzę w nasze zmartwychwstanie
-G
-Gdy Jezus przyjdzie znów
-h
-Wyznaję to
-G          A     D
-Wierzę w imię Jezus
-
-Refren 1
-D
-Tak, ja wierzę w Boga Ojca
-G
-W Syna, którym Jezus jest
-h
-Wierzę też w Świętego Ducha
-G
-Bóg jest w osobach trzech
-D
-Wierzę także w zmartwychwstanie
-G
-Że powstaniemy znów
-h
-Wyznaję to
-G          A     D
 Wierzę w imię Jezus` },
   { title: "Daj mi usłyszeć Twój głos - Mocni w Duchu",
     body: `1. Daj mi usłyszeć Twój głos, rozpoznać go.
 Daj mi wybierać Twe słowa pośród tysiąca słów.
 Daj mi zobaczyć Twą twarz, zatrzymać wzrok.
 Pokój znajduję w Tobie, gdy widzę Ciebie blisko.
-Ref. Jezus... x4
-2. Daj mi łaskę Twą, bym nie bał się.
-Daj mi uwierzyć, że mogę czynić cuda w Twoje Imię.
-Coda: Postaw mnie mocno na skale.
-Umocnij mnie, wybieram Cię na zawsze.
-Gdybyś mówił językami świata tego,
-nie znał granic,
-Wiedzę jego posiadł pełną,
-nic nie będziesz miał.
-To, co widzisz i co słyszysz, co smakujesz i co liczysz,
-Co posiadasz, to posiada cię.
-A ja kocham cię, mówi Pan.
-Naprawdę kocham cię, na wieki kocham cię.
-Miłość czeka, nie zawodzi,
-Kiedy zdradzisz – nie odchodzę.
-Miłość nigdy nie ustaje, trwa.
-Jestem w tobie, zawsze byłem,
-Czekam dzisiaj - każdą chwilę z tobą spędzić,
-Życie twoje, chcę.
-Bo ja kocham cię, mówi Pan.
-Naprawdę kocham cię, na wieki kocham cię.
-Akordy:
-zwr. i ref. G D e C/D
-bridge: a h C a h C/D
-Gdybyś mówił...
-G D e C/D` },
+Ref. Jezus... x4` },
   { title: "Duchu Święty rozpalaj serce me",
-    body: `	Guadalupe
-
-e C D e
+    body: `e C D e
 1.Duchu Święty rozpalaj serce me   // x 4
 
 C D e
 Ref. Chcemy Cię uwielbiać, chwalić Ciebie Panie
-Bo Ty jesteś światłem co nigdy nie gaśnie!
-
-2. Duchu Święty oświecaj serce me // x 4
-3. Duchu Święty uwalniaj serce me // x 4
-4. Duchu Święty uzdrawiaj, umacniaj, ochraniaj, oczyszczaj.....
-5. Duchu Święty rozraduj serce me` },
+Bo Ty jesteś światłem co nigdy nie gaśnie!` },
   { title: "Duchu Święty, przyjdź",
     body: `D G D
 Duchu Święty przyjdź.
@@ -1288,39 +918,7 @@ G D A
 G h G A h
 Z mocą wywyższaj go, duszo ma,
 G A D
-Uwielbiam Boże, Cię.
-
-G D A h
-1.Nowy dzień wraz ze wschodem słońca,
-G D A h
-Znów nadszedł czas, by Ci śpiewać pieśń.
-G D A h
-Cokolwiek jest już za mną i to wszystko co przede mną
-G D A D
-Wiem, będę śpiewać, gdy nadejdzie zmrok.
-
-	Ref. Duszo ma..
-
-G D A h
-2.Bogaty w miłość gniew oddalasz Panie
-G D A h
-Twe serce miłe wielbię imię Twe
-G D A h
-Ze względu na Twą dobroć będę śpiewać Tobie pieśni
-G D A D
-Wiele powodów by uwielbiać Cię
-
-	Ref. Duszo ma...
-
-G D A h
-3.Przyjdzie dzień gdy bez sił zostanę
-G D A h
-Nadejdzie czas mego końca tu
-G D A h
-Dusza ma będzie już na zawsze Cię uwielbiać
-G D A D
-W wieczności z Tobą piękna zabrzmi pieśń
-	Ref. Duszo ma…` },
+Uwielbiam Boże, Cię.` },
   { title: "Dzięki za Twój Krzyż",
     body: `D A h
 Dzięki za Twój Krzyż,
@@ -1338,45 +936,7 @@ Który rozdartą ziemię ramionami dwoma,
 d C g d
 Jak dziecko słabe matka, przed ciemnością bronisz,
 g A7 d
-Zmiłuj się nad nami!
-d A7 d
-Krzyżu święty, masz moc pojednania
-F C F A7
-I Północy z Południem, i Wschodu z Zachodem,
-d C g d
-Który nienawiść łamiesz, a niewolę kruszysz,
-g A7 d
-Zmiłuj się nad nami!
-
-d A d F C F F7
-Ref. Tobą mury rozwalać, Tobą się osłonić,
-B F C B F C A7||A7 d
-Tobie się ufnym sercem z miłością pokłonić. /2x
-
-2.
-d             A7           d
-Krzyżu święty, który ziemię spinasz,
-F               C             F                A7
-Jak, gdy żelazną klamrą człowiek dom swój chroni,
-d             C              g              d
-By się w gruzy nie rozpadł na zwęglonej ziemi,
-g         A7  d
-Zmiłuj się nad nami!
-
-d             A7            d
-Krzyżu święty nad nami wzniesiony,
-F          C          F            A7
-Jak bandaż litościwie ściągasz brzegi rany,
-d            C           g               d
-By się nowe zaczęło w sercu wyleczonym,
-g         A7  d
-Zmiłuj się nad nami!
-
-Ref.
-d    A       d        F    C     F   F7
-Tobą mury rozwalać, Tobą się osłonić,
-B        F     C     B        F     C  A7  d
-Tobie się ufnym sercem z miłością pokłonić. /2x` },
+Zmiłuj się nad nami!` },
   { title: "Jakie piękne jest Imię Twe - Hillsong Worship",
     body: `Zwrotka 1
 D 
@@ -1393,452 +953,56 @@ D A
 Jakie piękne jest Imię Twe  
 Jakie piękne jest Imię Twe
 h A G
-Twe Imię, Jezu, Królu nasz
-D A
-Jakie piękne jest Imię Twe, 
-nic z nim nie równa się
-h A G
-Jakie piękne jest Imię Twe, 
-Twe Imię Jezu
-
-Zwrotka 2
-D
-Nie chciałeś mieszkać w niebie bez nas  
-G h A
-Więc przyniosłeś niebo tu
-h A D
-Twa miłość, Jezu jest największa 
-G h A
-Nic nas nie rozłączy już
-
-Refren
-D A
-Jak cudowne jest Imię Twe   Jak cudowne jest Imię Twe
-h A G
-Twe Imię, Jezu, Królu nasz
-D A
-Jak cudowne jest Imię Twe, nic z nim nie równa się
-h A G
-Jak cudowne jest Imię Twe, Twe Imię Jezu
-
-Przejście G A h D x2
-G A
-Śmierć pokonana zasłona rozdarta  
-h D
-zamilkł już grzech i zamilkł grób 	
-G A
-Głośno grzmi niebo  chwałę Twą wielbiąc 
-h A
- bo z martwych wstał nasz Pan i Bóg    			
-G A
-Nie masz rywala  sobie równego  
-h D
-na zawsze rządzisz w mocy swej	
-G A
-Twoja jest chwała, Twoje królestwo
-h A
-A Imię Twe najwyższe jest  					
-
-Refren
-D A
-Jak potężne jest Imię Twe   Jak potężne jest Imię Twe
-h A G
-Twe Imię, Jezu, Królu nasz
-D A
-Jak potężne jest Imię Twe, nic z nim nie równa się
-h A G
-Jak potężne jest Imię Twe, Twe Imię Jezu` },
+Twe Imię, Jezu, Królu nasz` },
   { title: "Jam jest chleb życia",
     body: `G            h
 1.Jam jest Chleb Życia,
   C                   D
 Kto do Mnie przychodzi, nie będzie łaknął,
   G         h                 C
-Kto we Mnie wierzy, nigdy pragnąć nie będzie,
-G                      C
-Nikt nie może przyjść do Mnie,
-  a                    D
-Jeśli go nie pociągnie Ojciec.
-
-     G  D  G                 C G D
-Ref. A Ja go wskrzeszę, a Ja go wskrzeszę,
-     G          C         G D G
-A Ja go wskrzeszę w dniu ostatecznym.
-
-  G              h                   C            D
-2.Chlebem, który Ja dam, jest moje Ciało za życie świata,
-  G         h               C
-Jeśli kto spożywa ten chleb,
-G                   C             a              D
-Będzie żył na wieki, będzie żył na wieki.
-
-  G                       h              C       D
-3.Ja jestem Zmartwychwstaniem, Ja jestem Życiem,
-  G         h                       C
-Kto we Mnie wierzy, choćby i umarł,
-G               C     a       D
-Żyć będzie na wieki.` },
+Kto we Mnie wierzy, nigdy pragnąć nie będzie` },
   { title: "Jeden chleb",
     body: `G          e               C
 1.Jeden chleb, co zmienia się w Chrystusa Ciało,
   a       D7            G
-Z wielu ziaren pszenicznych się rodzi.
-  G          e                 C
-Jedno wino, co się Krwią Chrystusa stało,
-  a      D7             G
-Z soku wielu winnych gron pochodzi.
-
-  G                   C
-Jak ten chleb co złączył złote ziarna,
-  a        e       C       D
-Tak niech miłość łączy nas ofiarna.
-  G                    C
-Jak ten kielich łączy kropel wiele,
-  D       a         D7       G
-Tak nas, Chryste, w swoim złącz Kościele.
-
-  G          e               C
-2.O Pasterzu, zgromadź w jednej Swej owczarni
-  a          D7          G
-Zabłąkane owce, które giną.
-  G              e           C
-W jeden Kościół zbierz na nowo i przygarnij,
-  a             D7        G
-Byśmy jedną stali się rodziną.
-
-  G                 C
-Na ramiona Swoje weź o Panie,
-  a        e        C         D
-Tych co sami wrócić już nie mogą!
-  G                    C
-Jak ten kielich łączy kropel wiele,
-  D       a         D7       G
-Tak nas, Chryste, w swoim złącz Kościele.
-Niechaj zjednoczenia cud się stanie,
-Prowadź nas ku niebu wspólną drogą!` },
+Z wielu ziaren pszenicznych się rodzi.` },
   { title: "Jego miłość",
     body: `e h
 Jego miłość zakrywa grzech,
 C G D
 Ona nie pamięta złego,
 e h C a
-Jego krew największy dar dla każdego.
-e h
-Jego imię potężna moc,
-C G D
-Jezus drogą, prawdą, życiem.
-e h C a
-Emmanuel, Bóg pośród nas, Odkupiciel.
-
-e h
-Ref.: Bóg w łasce swej do nas zniżył się.
-C G D
-Pozostawił chwałę nieba,
-e h
-Jezus wycierpiał każdy trud,
-C G D
-żebyś żył i już się nie bał. x2
-
-e h C G D e
-        Jezus królem królów jest.
-h C G D e
-      Nasza wolność tylko w nim. (x2)
-
-e
-Tylko Tobie należy się chwała.
-h
-Tylko Tobie należy się cześć.
-C
-Tylko Tobie będziemy się kłaniać
-G D
-Jezu!` },
+Jego krew największy dar dla każdego.` },
   { title: "Jezus najwyższe imię",
     body: `C e a
 Jezus, Najwyższe Imię,
 d G
-Nasz Zbawiciel, Książę Pokoju,
-C e a
-Emmanuel, Bóg jest z nami,
-d G C C7
-Odkupiciel, Słowo Żywota!
-F G C a
-Święty Bóg, Mesjasz Prawdziwy,
-d G C C7
-Jedyny Ojca Syn, umiłowany,
-F G C a
-Zgładził grzech, Baranek na wieki,
-d G C (G)
-Królów Król i Panów Pan.` },
+Nasz Zbawiciel, Książę Pokoju` },
   { title: "Jezus zwyciężył",
     body: `d g
 Jezus zwyciężył, to wykonało się
 C F A7
-Szatan pokonany, Jezus złamał śmierci moc
-d g
-Jezus jest Panem, o Alleluja
-A d
-Po wieczne czasy Królem Królów jest
-d || g || C
-Jezus jest Panem x3
-F A
-Jezus jest Panem
-d
-Tylko Jezus jest Panem
-g
-Jezus jest Panem
-A d
-On jest Panem ziemi tej
-
-d g A d
-Alleluja, Alleluja, Alleluja, Alleluja x2` },
+Szatan pokonany, Jezus złamał śmierci moc` },
   { title: "Każdy spragniony",
     body: `C e
 Każdy spragniony i słaby dziś
 F
-Niech przyjdzie do źródła
-d e F
-W Wodzie Życia zanurzy się
-C e
-Ból i cierpienie niech odpłyną w dal
-F d e F
-W morzu miłości serca uleczy dzisiaj Pan
-C F
-Panie Jezu, przyjdź  x4` },
+Niech przyjdzie do źródła` },
   { title: "Lud Twój, Panie, lud pielgrzymi",
     body: `E         H         cis
 Ref. Lud Twój, Panie, lud pielgrzymi
      A          Fis     H
-     Prosi, byś był światłem,
-     E      H7        cis      E7
-     Byś na drodze do Królestwa
-     A        Fis   E     H
-     Wzmacniał serca swoim Ciałem.
-     gis     cis       fis  a  E H E
-     Zostań, zostań wśród nas, o Panie.
-
-  e               a                 e
-1.Chlebie życia, Tyś sam jest naszą siłą
-  e              D             e
-I czynisz trudną drogę tak bezpieczną,
-  e        H7          C          E7
-Jeśli siły na tym szlaku w nas osłabną,
-  A          Fis7                  H7
-Ręka Twoja niech obdarza wciąż nadzieją.
-
-  e            a             e
-2.Twoja Krew niechaj jest napojem mocy
-  e             D              e
-Kieruje zapał kroków w Twoje ślady,
-  e            H7               C         E7
-Jeśli radość gaśnie w sercach od słabości,
-  A                 Fis7            H7
-Twój głos sprawi, że obudzi się w nas świeżość.
-
-  e           a               e
-3.Twoje Ciało, o Jezu, rodzi Kościół,
-  e            D              e
-Bo uczysz, żeśmy braćmi w pyle drogi.
-  e            H7                C        E7
-Jeśli krzywdy niszczą światło Twej miłości,
-  A              Fis7           H7
-Z Twego serca płynie nowe przebaczenie.` },
+     Prosi, byś był światłem` },
   { title: "Matko o twarzy jak polska ziemia czarnej",
     body: `d g
 Ref. Matko, o twarzy jak polska ziemia czarnej,
 C F A
-Matko, o twarzy jak polska ziemia znaczonej bliznami,
-d g
-Do serca swego jak Syna nas przygarnij.
-C F A || A d
-Królowo nasza, Tarczo Obronna, módl się za nami.
-
-d a F g
-1. Próżno niejeden wróg wkładał zbroję,
-C [F g] d A
-by dzieci Twoje zniewolić, Ojczyznę zabrać im.
-d a F g C F g
-Ty, choć bez zbroi i bez oręża, zawsze zwyciężasz,
-d A
-By wskazać, że pokój daje Syn.
-
-d a F g
-2. Próżno pragnęli z serc Cię wyrzucić,
-C [F g] d A
-Pokój zakłócić, odebrać nadzieję, wiary znak,
-d a F g C F g
-Bo kto Cię, Matko, kochać nie umie, ten nie zrozumie,
-d A
-Dlaczego przy Tobie trwamy tak.
-
-d a F g
-3. Dziś wróg z ukrycia i bez pancerza.
-C [F g] d A
-W serca uderza, nie pozwól, by zniszczył Boga w nas.
-d a F g C F g
-Matko, błagamy, w czas niespokojny
-d A
-Broń nas od wojny, wierzymy - zwyciężysz jeszcze raz.` },
+Matko, o twarzy jak polska ziemia znaczonej bliznami` },
   { title: "Matko, która nas znasz",
     body: `e C
 Ref. Matko, która nas znasz,
 D e
-Z dziećmi Twymi bądź,
-e G D
-Na drogach nam nadzieją świeć,
-e D7 e D e
-Z Synem Twym z nami idź.
-
-1.
-G                   e
-Z wszystkich niewiast wybrana,
-e        D     e
-Przyjdź i drogę wskaż.
-G           e
-Córko Ludu Bożego,
-a          H7
-Do Syna Twego nas prowadź.
-e          C
-Służebnico pokorna,
-a      H7    e  D
-Pokój światu daj.
-
-e C
-Ref. Matko, która nas znasz,
-D e
-Z dziećmi Twymi bądź,
-e G D
-Na drogach nam nadzieją świeć,
-e D7 e D e
-Z Synem Twym z nami idź.
-
-2.
-G                   e
-Królowo ognisk rodzinnych,
-e        D     e
-Przyjdź i drogę wskaż.
-G              e
-Dziewico, wzorze prostoty,
-a          H7
-Do Syna Twego nas prowadź.
-e          C
-Oblubienico cieśli,
-a      H7    e  D
-Pokój światu daj.
-
-e C
-Ref. Matko, która nas znasz,
-D e
-Z dziećmi Twymi bądź,
-e G D
-Na drogach nam nadzieją świeć,
-e D7 e D e
-Z Synem Twym z nami idź.
-
-3.
-G                 e
-Królowo narodu naszego,
-e        D     e
-Przyjdź i drogę wskaż.
-G             e
-Uciśnionych nadziejo,
-a          H7
-Do Syna Twego nas prowadź.
-e                 C
-Światło łaknących prawdy,
-a      H7    e  D
-Pokój światu daj.
-
-e C
-Ref. Matko, która nas znasz,
-D e
-Z dziećmi Twymi bądź,
-e G D
-Na drogach nam nadzieją świeć,
-e D7 e D e
-Z Synem Twym z nami idź.
-
-4.
-G                   e
-Pociecho ludu biednego,
-e        D     e
-Przyjdź i drogę wskaż.
-G                 e
-Pani wszelkiej radości,
-a          H7
-Do Syna Twego nas prowadź.
-e             C
-Matko tkliwego serca,
-a      H7    e  D
-Pokój światu daj.
-
-e C
-Ref. Matko, która nas znasz,
-D e
-Z dziećmi Twymi bądź,
-e G D
-Na drogach nam nadzieją świeć,
-e D7 e D e
-Z Synem Twym z nami idź.
-
-5.
-G                     e
-Matko przez Syna nam dana,
-e        D     e
-Przyjdź i drogę wskaż.
-G                    e
-Matko, która nas słuchasz,
-a          H7
-Do Syna Twego nas prowadź.
-e               C
-Ty nas zawsze rozumiesz,
-a      H7    e  D
-Pokój światu daj.
-
-e C
-Ref. Matko, która nas znasz,
-D e
-Z dziećmi Twymi bądź,
-e G D
-Na drogach nam nadzieją świeć,
-e D7 e D e
-Z Synem Twym z nami idź.
-
-6.
-G                     e
-Dziewico, Matko Chrystusa,
-e        D     e
-Przyjdź i drogę wskaż.
-G                    e
-Dziewico, Matko Kościoła,
-a          H7
-Do Syna Twego nas prowadź.
-e                 C
-Dziewico, Matko ludzi,
-a      H7    e  D
-Pokój światu daj.
-
-e C
-Ref. Matko, która nas znasz,
-D e
-Z dziećmi Twymi bądź,
-e G D
-Na drogach nam nadzieją świeć,
-e D7 e D e
-Z Synem Twym z nami idź.
-
-7.
-G                     e
-Dziewico z nami idąca,
-e        D     e
-Przyjdź i drogę wskaż.
-G                     e
-Historii świata promieniu,
-a          H7
-Do Syna Twego nas prowadź.
-e             C
-Pośredniczko najlepsza,
-a      H7    e  D
-Pokój światu daj.` },
+Z dziećmi Twymi bądź` },
   { title: "Misericordias Domini",
     body: `d A d C
 Misericordias Domini,
@@ -1848,1479 +1012,131 @@ in aeternum cantabo.` },
     body: `h A h fis
 Mów do mnie Panie, chcę słyszeć Cię,
 h A G
-Przyjąć od Ciebie, co masz dla mnie.
-h A h fis
-Nie chcę się chować, lecz w Tobie skryć.
-h A G A
-W cieniu Twym, Panie, chcę iść.
-h G A h
-Święty, potężny jesteś, Panie nasz,
-G A h
-Przed Tobą dziś możemy stać,
-G h A
-Dzięki łasce, nie dzięki nam samym.` },
+Przyjąć od Ciebie, co masz dla mnie.` },
   { title: "Nasz Bóg jest potężny",
     body: `C G D e C
-Nasz Bóg jest potężny w mocy swej, króluje nad nami dziś
-G a h e
-Z nieba rządzi w mocy, miłości, mądrości swej.` },
+Nasz Bóg jest potężny w mocy swej, króluje nad nami dziś` },
   { title: "Nasz Bóg jest wielki - Chris Tomlin",
     body: `cis A E
 Wodę zamieniłeś w wino
 cis A E fis H
-Ślepi przy Tobie znów widzą, któż jest jak Ty? Tylko Ty?
-cis A E
-Blaskiem rozświetlasz ciemności
-cis A E fis H
-Człowiek powstaje z marności, któż jest jak Ty? Tylko Ty?
-
-cis A
-Ref. Nasz Bóg jest wielki, nasz Bóg jest silny
-E H
-Boże nikt inny nie równa się z Tobą.
-Nasz Bóg uzdrawia, jest wszechmogący.
-Nasz Bóg, Nasz Bóg.  X2
-
-cis A E
-Blaskiem rozświetlasz ciemności
-cis A E fis H
-Człowiek powstaje z marności, któż jest jak Ty? Tylko Ty?
-
-Ref x2
-cis A
-Nasz Bóg jest wielki, nasz Bóg jest silny
-E H
-Boże nikt inny nie równa się z Tobą.
-Nasz Bóg uzdrawia, jest wszechmogący.
-Nasz Bóg, Nasz Bóg.  X2
-
-cis A
-Jeśli nasz Bóg jest przy nas już nic nas nie zatrzyma!
-E H
-Jeśli nasz Bóg jest z nami, któż jest przeciwko nam?
-x2
-
-cis A
-Ref. Nasz Bóg jest wielki, nasz Bóg jest silny
-E H
-Boże nikt inny nie równa się z Tobą.
-Nasz Bóg uzdrawia, jest wszechmogący.
-Nasz Bóg, Nasz Bóg.  X2` },
+Ślepi przy Tobie znów widzą, któż jest jak Ty? Tylko Ty?` },
   { title: "Nic nie musisz mówić nic",
     body: `e C
 Nic nie musisz mówić nic
 D
-Odpocznij we mnie
-G H7
-Czuj się bezpiecznie
-e C
-Pozwól kochać się
-D G H7
-Miłość pragnie Ciebie` },
+Odpocznij we mnie` },
   { title: "Nie mądrość świata tego (Marana tha!)",
     body: `d || C                                F || G
-Marana tha, marana tha! /x4
-
-d F
-ref.: Nie mądrość świata tego
-C g d
-Lecz Pana ukrzyżowanego
-F C G
-Głosimy aż przyjdzie znów /x2
-
-d F
-1. Bo Chrystus Jezus skałą serca mego
-C G d
-Odsunął kamień, serce z ciała dał mi swego
-F
-By nas na nowo zrodzić – wstąpił w niebo
-C G
-Aby świętego Ducha zesłać nam dlatego
-
-d F
-ref.: Nie mądrość świata tego
-C g d
-Lecz Pana ukrzyżowanego
-F C G
-Głosimy aż przyjdzie znów /x2
-
-d F
-2. Zbawienie swoje z wiarą spożywajcie
-C G d
-Zrodzeni w ogniu z Ducha życiem rozgłaszajcie
-F
-Że tego któregośmy krzyżowali
-C G
-Bóg wezwał z martwych i do swojej chwały, wziął stąd
-
-d F
-ref.: Nie mądrość świata tego
-C g d
-Lecz Pana ukrzyżowanego
-F C G
-Głosimy aż przyjdzie znów /x2
-
-d F
-    3. Idźcie i głoście Syna Boga Panem
-C G d
-Krwią Jego imię wasze w niebie zapisane
-F
-W Jego miłości wszystkich zanurzajcie
-C G
-Królestwa Jego – niechaj przyjdzie – przyzywajcie!
-
-d || C                                F || G
-Marana tha, marana tha! /x4
-
-ref.: d F
-ref.: Nie mądrość świata tego
-C g d
-Lecz Pana ukrzyżowanego
-F C G
-Głosimy aż przyjdzie znów /x2` },
+Marana tha, marana tha! /x4` },
   { title: "Niechaj zstąpi Duch Twój i odnowi ziemię",
     body: `e
-Niechaj zstąpi Duch Twój i odnowi ziemię
-C
-Życiodajny spłynie deszcz na spragnione serce,
-a h
-Obmyj mnie i uświęć mnie;
-e C H7
-Uwielbienia niech popłynie pieśń!  x2				
-C G
-Chwała Jezusowi, który za mnie życie dał!
-C G
-Chwała Temu, który pierwszy umiłował mnie.
-C h e
-Jezus! Tylko Jezus Panem jest!` },
+Niechaj zstąpi Duch Twój i odnowi ziemię` },
   { title: "Niepojęty, Niezmierzony",
     body: `a G C
-1.	Z głębokości mórz aż po szczyty gór
-d C B
-Stworzenie objawia Majestat Twój
-a G C
-Od kolorów jesieni po wiosenny nów
-d C B
-Wszystko śpiewa Ci pieśń pełną cudownych słów
-F G
-ogłaszając
-C G
-Niepojęty, niezmierzony
-F
-gwiazdy stworzyłeś na niebie
-a
-i każdą z nich znasz
-G F
-Wspaniałym Bogiem Tyś jest
-C G
-Wszechmogący nieskończony
-F
-W zachwycie klękamy przed Tobą
-a
-By wyznać to że
-G F
-wspaniałym Bogiem Tyś jest
-a G C
-2. Kto uwalnia błyskawic moc w czasie burz
-d C B
-Kto maluje kolory porannych zórz
-a G C
-Słońce stworzył na niebie i dał mu Swą moc
-d C B
-Orzeźwienie przynosi w gwieździstą noc
-F G
-Tylko Ty
-C G
-Niepojęty, niezmierzony
-F
-Gwiazdy stworzyłeś na niebie
-a
-I każdą z nich znasz
-G F
-Wspaniałym Bogiem Tyś jest
-C G
-Zawsze dobry miłujący
-F
-Ty znasz moje serce i mimo to
-a
-Wciąż kochasz mnie
-G F C
-Wspaniałym Bogiem Tyś jest	(+instr + ref.2)` },
+1. Z głębokości mórz aż po szczyty gór` },
   { title: "Nikt Cię nie kocha tak jak Ja - Guadalupe",
     body: `F C d
-1. Ile czekałem na tą chwilę
-B C
-Ile czekałem byś zechciał przyjąć Mnie
-F C d
-Ile czekałem, byś się odezwał
-B C
-Byś w me ramiona w końcu wtulił się
-
-F C d
-Ja wiem dobrze, co przeżywasz
-B C
-Wiem też dobrze, czemu płaczesz
-F C d
-I znam dobrze Twe cierpienie
-B C
-Bo nigdy nie opuściłem Ciebie
-
-F C d
-Ref. Nikt Cię nie kocha tak jak Ja
-B C
-Nikt Cię nie kocha tak jak Ja
-F C d
-Popatrz na krzyż oto dowód mej miłości
-B C
-Nikt Cię nie kocha tak jak Ja
-
-F C d
-Nikt Cię nie kocha tak jak Ja
-B C
-Nikt Cię nie kocha tak jak Ja
-F C d
-Popatrz na krzyż, to dla Ciebie, bo Cię kocham!
-B C F
-Nikt Cię nie kocha tak jak Ja
-
-F C d
-2. Ja wiem, co chcesz Mi powiedzieć
-B C
-Chociaż czasem nic nie mówisz
-F C d
-Wiem też dobrze to, co czujesz
-B C
-Choć tym ze Mną się nie dzielisz
-
-F C d
-Przy Twym boku wciąż kroczyłem
-B C
-W trudnych chwilach niosłem Ciebie
-F C d
-Wiedz, że robię to, bo Jestem
-B C
-Twym najlepszym przyjacielem!` },
+1. Ile czekałem na tą chwilę` },
   { title: "O Zbawcza Hostio",
     body: `O Zbawcza Hostio godna czci
-Co lud do niebios wiedziesz bram
-Znój srogi nęka wiernych Ci
-Daj siłę pomoc ześlij nam
-Jednemu w Trójcy Władcy ziem
-Niech będzie chwała w każdy czas
-Niech on wieczystym życiem swym
-W ojczyźnie rajskiej darzy nas. Amen` },
+Co lud do niebios wiedziesz bram` },
   { title: "Oceany - Hillsong UNITED",
     body: `h fis D
-Znad oceanów do mnie wołasz
-A G A
-Gdzie każdy krok niepewny jest
-h fis D
-Ty jesteś tam, gdzie niewiadoma
-A G
-Tam znajdę grunt dla wiary mej
-G D A
-I będę wzywać imię Twe
-G D A
-I ponad fale patrzeć chcę
-G
-Gdy burzą się
-D A
-Dla duszy pokój w Tobie jest
-G A
-Gdzie pójdziesz Ty
-h fis D A G (A)
-Ja pójdę też
-
-h fis D
-Mój strach utonie w Twojej łasce
-A G A
-Bo ręka Twa prowadzi mnie
-h fis D
-I Ty mnie nigdy nie zawiodłeś
-A G
-Wiem, teraz też nie zawiedziesz mnie
-G D A
-I będę wzywać imię Twe
-G D A
-I ponad fale patrzeć chcę
-G
-Gdy burzą się
-D A
-Dla duszy pokój w Tobie jest
-G A
-Gdzie pójdziesz Ty
-h
-Ja pójdę też
-
-h
-Duchu prowadź mnie
-D
-Gdzie wiara nie ma granic
-A
-Daj mi chodzić nad wodami
-G
-Gdziekolwiek mnie zabierzesz
-h
-Prowadź głębiej niż
-D
-Pójść mogą moje stopy
-A
-Moja wiara się umocni
-G
-W Twojej obecności 		{Bridge}x3
-
-G D A
-I będę wzywać imię Twe
-G D A
-I ponad fale patrzeć chcę
-G
-Gdy burzą się
-D A
-Dla duszy pokój w Tobie jest
-G A
-Gdzie pójdziesz Ty
-h fis D A G (A)
-Ja pójdę też` },
+Znad oceanów do mnie wołasz` },
   { title: "Pan Bóg Izraela",
     body: `| Am | F | C |
- Nowe słońce wzejdzie nam
-Z domu Dawida zbawczy blask
-Zniknie mrok i śmierci cień
-Nadejdzie Pana wielki dzień
-
-| Am | F | C |
-Przedziwny doradca 
-| Am | F | C |
-Bóg mocny, Odwieczny ojciec 
-| Am | F | C | Em/H |
-Książę pokoju 
-| Am | F | C |
-Wielkie będzie Jego panowanie 
-| Am | F | C |
-W pokoju bez granic 
-
-| Am | F7+ | C | G |
-Błogosławiony Pan Bóg Izraela
-Stworzenie wiecznie będzie Tobie śpiewać
-Błogosławiony Pan Bóg Izraela
-Wraz z aniołami wywyższamy króla Nieba
-
-| Am |
-Alfa, Omega 
-| F |
-Pierwszy i ostatni 
-| C | Em/H |
-Początek i koniec 
-| Am | F |
-Nadeszło zbawienie, potęga i panowanie
-| C | Em |
-Lwa z rodu Judy 
-
-Am | F7+ | C | G |
-Błogosławiony Pan Bóg Izraela
-Stworzenie wiecznie będzie Tobie śpiewać
-Błogosławiony Pan Bóg Izraela
-Wraz z aniołami wywyższamy króla Nieba
-
-Hosanna 		| Am | G/H | C |
-Synowi Dawida 	| F6 |
-Hosanna 		| Am | G/H | C |
-
- | Am | F | C |
-Nowe słońce wzeszło nam
-Z domu Dawida zbawczy blask
-Zniknął mrok i śmierci cień
-Nadejdzie Pana wielki dzień` },
+ Nowe słońce wzejdzie nam` },
   { title: "Pan jest mocą swojego ludu",
     body: `F B C
-  dC
-Pan jest mocą swojego ludu.
-F C
-Pieśnią moją jest Pan.
-B A d
-Moja tarcza i moja moc.
-C F B C
-On jest mym Bogiem, nie jestem sam,
-a d B C F (dC)
-W Nim moja siła, nie jestem sam.` },
+Pan jest mocą swojego ludu.` },
   { title: "Pan wywyższony, nasz Król wywyższony",
     body: `E cis A
-Pan wywyższony, nasz Król wywyższony wśród chwał,
-fis H
-Uwielbiajmy Go.
-E cis A H Cis
-Pan wywyższony nasz Król wywyższony, oddajmy Jemu cześć
-fis H E cis
-Królem jest Pan, ta prawda na wieki trwa.
-fis H E gis A H
-Niech cały świat raduje się Jego imieniem:
-A fis H E
-Pan wywyższony, nasz Król wywyższony wśród chwał.` },
+Pan wywyższony, nasz Król wywyższony wśród chwał` },
   { title: "Panie mój, cóż Ci oddać mogę",
     body: `Refren:
 G7 C G a d e a d G
-Panie mój, cóż Ci oddać mogę, za bezmiar niezliczonych łask?
-e a G C d a F C
-W każdy dzień sławić będę Cię, wielbić Cię, alleluja!
-1.
-e a e d G e
-Ty, jak Ojciec wiedziesz mnie i chronisz mnie od łez
-a G C D7 e C G
-Ty znasz wszystkie kroki moje, próżny jest mój lęk.
-2.
-e a e d G e
-Byłem słabym dzieckiem Twym, Tyś mnie w ramiona wziął,
-a G C D7 e C G
-Gdy ubogim byłem, Panie, Tyś wzbogacił mnie.
-3.
-e a e d G e
-Błogosławię Imię Twe i sławię dobroć Twą,
-a G C D7 e C G
-Wiem, że dojdę drogą Twoją w święty Ojca dom.
-4.
-e a e d G e
-Gdy wyznaję nędzę swą, jak Ojciec słuchasz mnie,
-a G C D7 e C G
-Gdy lęk śmierci mnie ogarnia, Ty umacniasz mnie.` },
+Panie mój, cóż Ci oddać mogę, za bezmiar niezliczonych łask?` },
   { title: "Panie, dobry jak chleb",
     body: `C F G
-Ref. Panie, dobry jak chleb,
-a F G
-Bądź uwielbiony od swego Kościoła,
-C e F C
-Bo Tyś do końca nas umiłował,
-d G C
-Do końca nas umiłował.
-
-d G d
-1. Tyś na pustkowiu chleb rozmnożył, Panie,
-G D G
-Byśmy do nieba w drodze nie ustali,
-a G C
-Tyś stał się manną wędrowców przez ziemię,
-G C G
-Dla tych, co dotąd przy Tobie wytrwali.
-
-2.
-d               G         d
-Ziarna zbierzemy, odrzucimy chwasty,
-G        D               G
-Bo łan dojrzewa, pachnie świeżym chlebem,
-a            G          C
-Niech ziemia nas stanie się ołtarzem,
-G       C                      G
-A chleb komunią dla spragnionych Ciebie.
-
-3.
-d               G             d
-Ty nas nazwałeś swymi przyjaciółmi,
-G               D             G
-Jeśli spełnimy, co nam przykazałeś.
-a          G            C
-Cóż my bez Ciebie, Panie, uczynimy?
-G           C                G
-Tyś naszym życiem i oczekiwaniem.
-
-4.
-d               G           d
-Tyś za nas życie swe oddał na krzyżu,
-G             D              G
-A w znaku chleba w świątyniach zostałeś,
-a           G          C
-I dla nas zawsze masz otwarte serce,
-G        C               G
-Bo Ty do końca nas umiłowałeś.` },
+Ref. Panie, dobry jak chleb` },
   { title: "Panie, pragnienia ludzkich serc",
     body: `C e F C F e
-Ref. Panie, pragnienia ludzkich serc Ty zaspokoisz sam.
-a e
-Przyjdź, Chlebie Żywy, Zbawco nasz,
-d7 G C
-Pszeniczny Darze, przyjdź.
-
-C a F e a
-1.Jak pasterz woła owce swe i znają Jego głos,
-d G d G
-Tak wzywasz nas, rodzinę swą, za Tobą chcemy iść.
-
-C a F e a
-2.Z radością więc śpiewamy Ci ten dziękczynienia hymn.
-d G d G
-Godnymi czynisz dzisiaj nas niebieski dzielić chleb.
-
-C a F e a
-3.Ty, Panie, dajesz siebie nam, by naszym życiem być,
-d G d G
-Jak braciom służyć, naucz, jak miłością, prawdą żyć.` },
+Ref. Panie, pragnienia ludzkich serc Ty zaspokoisz sam.` },
   { title: "Pasja miłości - Beata Bednarz",
-    body: `capo 1
-
-	1.
-h          A   h
-Wzgardzony był On
-h         A     h
-Przygięty cierpieniem
-h         A        G   h
-Zraniony i niewinny tak
-h          A      h
-Niósł ciężar i wstyd
-h           A      h
-Niósł grzechy i winy
-h          A        G          h
-Chorobę, ból i nasz strach
-
-e           fis
-Każdy grzech
-h         A
-Na krzyżu spłacił
-e        fis
-Swoją krwią
-
-Ref.
-D             A
-On zdradzony jak nikt
-h
-Zraniony jak nikt
-A
-Miał za nas tam iść
-D
-Z miłością niosąc krzyż
-A
-Kto może pojąć dziś
-h
-Jak wielki był to ból
-A
-Za ciebie za mnie szedł
-A     (h)
-Jezus mój
-
-2.
-h         A      h
-Za ciebie i mnie
-h          A       h
-Na krzyża ramionach
-h            A          G       h
-Rozpięty był On, Pan i Król
-h           A    h
-Człowiekiem się stał
-h           A      h
-I jak człowiek skonał
-h            A          G           h
-Z miłością zniósł strach i ból
-
-e           fis
-Każdy grzech
-h         A
-Na krzyżu spłacił
-e        fis
-Swoją krwią
-
-Ref.
-             D
-Czy wierzysz, że
-              A
-On zdradzony jak nikt
-h
-Zraniony jak nikt
-A
-Miał siłę aby iść
-D
-Z miłością niosąc krzyż
-A
-Kto może pojąć dziś
-h
-Jak wielki był to cud
-A                  (h)
-Barankiem stał się Bóg
-
-D             A
-On zdradzony jak nikt
-h
-Zraniony jak nikt
-A
-Miał siłę aby iść
-D
-Z miłością niosąc krzyż
-A
-Kto może pojąć dziś
-h
-Jak wielki był to cud
-A
-Barankiem stał się Bóg
-A     h
-Jezus mój` },
+    body: `h          A   h
+Wzgardzony był On` },
   { title: "Poddaję wszystko Tobie",
     body: `G D a C
-1. Dzisiaj składam u Twych stóp
-Własną dumę, własny trud
-Poddaję wszystko Tobie
-Poddaję wszystko Tobie
-Dzisiaj składam u Twych stóp
-Każde kłamstwo, każdy ból
-Poddaję wszystko Tobie
-
-REFREN
-G D a C
-Przyjmij dziś to, co mam
-Oddaję Ci moją przestrzeń
-Możesz czynić, co zechcesz  x4
-
-G D a C
-2. Życie składam u Twych stóp
-Twoją drogą pragnę pójść
-Poddaję wszystko Tobie
-Poddaję wszystko Tobie
-Życie składam u Twych stóp
-Twoją drogą pragnę pójść
-Poddaję wszystko Tobie.
-
-Ref. x4` },
+1. Dzisiaj składam u Twych stóp` },
   { title: "Podnieś mnie, Jezu",
     body: `d B C a
- Podnieś mnie, Jezu, i prowadź do Ojca.
-d B C a
- Podnieś mnie, Jezu, i prowadź do Ojca.
-F C a
-  Zanurz mnie w wodzie Jego miłosierdzia.
-d C a d
-Amen /x3` },
+Podnieś mnie, Jezu, i prowadź do Ojca.` },
   { title: "Pokładam w Panu ufność mą",
     body: `Ref.
-fis        h          E              fis
-Pokładam w Panu ufność mą, zawsze ufam Jego słowu.
-
-1.
-fis                    cis
-Z głębokości wznoszę głos do Ciebie,
-cis                   fis
-racz wysłuchać, Panie prośby mej.
-D                     fis
-nakłoń ku mnie ucho Twe łaskawie,
-cis               fis
-usłysz modły i błagania.
-
-Ref.
-fis        h          E              fis
-Pokładam w Panu ufność mą, zawsze ufam Jego słowu.
-
-2.
-fis                      cis
-Jeśli grzechów nie zapomnisz, Panie,
-cis                    fis
-Któż przed gniewem Twym ostoi się?
-D                         fis
-Lecz ufamy, że przebaczysz winy,
-cis               fis
-Byśmy kornie Ci służyli.
-
-Ref.
-fis        h          E              fis
-Pokładam w Panu ufność mą, zawsze ufam Jego słowu.
-
-3.
-fis                   cis
-Całą ufność mą pokładam w Panu,
-cis                 fis
-Dusza moja ufa Jego słowu,
-D                         fis
-Tęskniej czeka dusza moja Pana,
-cis                  fis
-Niż jutrzenki nocne straże.
-
-Ref.
-fis        h          E              fis
-Pokładam w Panu ufność mą, zawsze ufam Jego słowu.
-
-4.
-fis                        cis
-Tęskniej niż jutrzenki nocne straże
-cis                  fis
-Niechaj Pana czeka Boży lud,
-D                         fis
-Bo u Pana znajdzie zmiłowanie
-cis                fis
-I obfite odkupienie.
-
-Ref.
 fis        h          E              fis
 Pokładam w Panu ufność mą, zawsze ufam Jego słowu.` },
   { title: "Powietrze już drga",
     body: `[Zwrotka 1]
 E                H
-Ruszamy w drogę, jeden łączy nas cel
-A                  H           A H
-We wspólnej wędrówce spotkaliśmy się
-E             H
-Jak Maryja chcemy przyjąć Twój plan
-A               H       A H
-To my Twoi słudzy wołamy co dnia
-cis        Gis
-Ojcze nasz, Panie nasz
-E          H           A H
-Niech dziś wola Twa wypełni się w nas
-cis        Gis
-Chcemy jak Matka Twa
-E            H             A H
-Otwierać swe serca na łaski tej dar
-
-[Refren]
-E                 H
-Wszyscy słyszą nasz radosny głos
-A             H               A H  A H
-Podnosimy swe ręce, powietrze już drga
-E             H
-Jezus żyje, nie zostawi nas
-A           H          E
-Już teraz na miłość jest czas
-
-[Zwrotka 2]
-E                 H
-Ty, co ciągle poszukujesz swych dróg
-A               H             A H  A H
-Posłuchaj uważnie, co mówi Ci Bóg
-E                         H
-Spróbuj z nami podnieść w górę swój wzrok
-A               H              A H  A H
-Gdy tracisz nadzieję, bo zgubiłeś gdzieś
-cis          Gis
-uśmiech Twój, miłość Twą
-E           H           A H
-Odzyskasz je znów, zaufaj bo On
-cis         Gis
-dobrze zna serca głos
-E                 H           A H
-I ruszaj bez strachu, zrób pierwszy krok!
-
-[Refren]
-E                 H
-Wszyscy słyszą nasz radosny głos
-A             H               A H  A H
-Podnosimy swe ręce, powietrze już drga
-E             H
-Jezus żyje, nie zostawi nas
-A           H          E
-Już teraz na miłość jest czas
-
-[Zwrotka 3]
-E                       H
-To Maryja pierwsza znała ten dar
-A               H               A H  A H
-Miłości bez końca, co zawsze już trwa
-E               H
-Zaufała, nauczyła nas jak
-A               H                 A H  A H
-Przyjmować do serca Jezusa, gdy On
-cis       Gis
-Daje nam Ciało Swe
-E            H           A H
-Ja przyjąć Go chcę, podnoszę swój głos,
-cis          Gis
-Wołam On Panem mym
-E          H            A H
-Ja ufam Jemu, a On ufa mi!
-
-[Refren]
-E                 H
-Wszyscy słyszą nasz radosny głos
-A             H               A H  A H
-Podnosimy swe ręce, powietrze już drga
-E             H
-Jezus żyje, nie zostawi nas
-A           H          E
-Już teraz na miłość jest czas
-
-[Zwrotka 4]
-E                  H
-Nie zwątpiła w obietnicę Twą
-A             H              A H  A H
-Maryja, tak młoda, nie bała się wstać
-E                         H
-I z pośpiechem wyruszyć na górski szlak
-A               H           A H  A H
-Jej krewna Elżbieta witała ją tak:
-cis          Gis
-„Raduj się, chwała Ci,
-E          H                     A H
-Bo owoc Twej wiary, Syn Jezus, nasz Pan”
-cis          Gis
-I ja też słyszeć chcę
-E             H                 A H
-„Twa wiara wystarczy, nie lękaj się!"
-
-[Refren]
-E                 H
-Wszyscy słyszą nasz radosny głos
-A             H               A H  A H
-Podnosimy swe ręce, powietrze już drga
-E             H
-Jezus żyje, nie zostawi nas
-A           H          E  (x4)
-Już teraz na miłość jest czas` },
+Ruszamy w drogę, jeden łączy nas cel` },
   { title: "Prawda jedyna",
     body: `D A fis cis
-Prawda jedyna słowa Jezusa z Nazaretu,
-D A fis cis
-że swego syna posłał z niebios Bóg na świat.
-D A fis cis
-Aby niewinnie cierpiąc zmarł za nasze grzechy
-D A fis cis
-i w pohańbieniu przyjął winy wszystkich nas.
-
-D A fis cis D
-Dzięki Ci Boże mój za ten krzyż, który Jezus
-A fis cis
-cierpiał za mnie, Jezus cierpiał za mnie.
-
-D A fis cis
-Uwierz w Jezusa, przecież On za ciebie umarł
-D A fis cis
-i z miłości do nas przyszedł z nieba na ten świat.
-D A fis cis
-Błogosławiony ten, kto wierzy, choć nie widział
-D A fis cis
-zaufaj dziś Bogu a na wieki będziesz żył.
-
-D A fis cis D
-Dzięki Ci Boże mój za ten krzyż, który Jezus
-A fis cis
-cierpiał za mnie, Jezus cierpiał za mnie.` },
+Prawda jedyna słowa Jezusa z Nazaretu` },
   { title: "Przed tak Wielkim Sakramentem",
     body: `Przed tak Wielkim Sakramentem
-Upadajmy wszyscy wraz,
-Niech przed Nowym Testamentem
-Starych praw ustąpi czas.
-Co dla zmysłów niepojęte,
-Niech dopełni wiara w nas.
-
-Bogu Ojcu i Synowi
-Hołd po wszystkie nieśmy dni.
-Niech podaje wiek wiekowi
-Hymn triumfu, dzięki, czci.
-A równemu im Duchowi
-Niechaj wieczna chwała brzmi.
-Amen.
-` },
+Upadajmy wszyscy wraz` },
   { title: "Przenikasz mnie - Guadalupe",
     body: `a C
-1. Przenikasz i znasz mnie Panie,
-a F G
-znasz moje słabości i cierpienia.
-a C
-Przenikasz i znasz mnie Panie,
-F C G
-moje łzy i poświęcenie.
-
-Ref.
-F d
- Tylko w Tobie prawda jest,
-a G
-nie co mówią, nie co myślą.
-F d
-Tylko Ty mnie Panie znasz,
-a G
-do głębi przenikasz mnie.
-F d
-Tylko w Tobie prawda jest,
-a G
-nie co mówię, nie co myślę.
-F d
-Tylko Ty mnie Panie znasz,
-a G
-w pełni.
-
-instrumental F C d a F C G a
-
-2. I dobrze znasz moją duszę, /	
-tak cenna jest w Twoich oczach.
-Znasz moje uczucia i pragnienia, /
-nie tajne Ci moje roztargnienia.
-
-Ref.
-F d
- Tylko w Tobie prawda jest,
-a G
-nie co mówią, nie co myślą.
-F d
-Tylko Ty mnie Panie znasz,
-a G
-do głębi przenikasz mnie.
-F d
-Tylko w Tobie prawda jest,
-a G
-nie co mówię, nie co myślę.
-F d
-Tylko Ty mnie Panie znasz,
-a G
-w pełni.
-
-instrumental F C d a F C G a
-
-F G
-Bridge: Wszystko co mam to Ty
-
-Ref.
-F d
- Tylko w Tobie prawda jest,
-a G
-nie co mówią, nie co myślą.
-F d
-Tylko Ty mnie Panie znasz,
-a G
-do głębi przenikasz mnie.
-F d
-Tylko w Tobie prawda jest,
-a G
-nie co mówię, nie co myślę.
-F d
-Tylko Ty mnie Panie znasz,
-a G
-w pełni.` },
+1. Przenikasz i znasz mnie Panie` },
   { title: "Przybądź Święty Niepojęty",
     body: `1.
 A            C               D             A
-Języku ognia przyjdź i płoń w naszych sercach,
-D               A
-Duchu Miłości przemieniaj nas.
-A               C           D         A
-Swe pocieszenie nam daj i nim wypełniaj,
-D               A
-Duchu Nadziei umacniaj nas.
-
-Ref.
-A E      fis          D          A
-Przybądź Święty Niepojęty, z Nieba na nas tchnięty Duchu,
-A               E          fis          D          A
-Rozpal Świętą, Niepojętą, z Nieba na nas tchniętą miłość,
-D           A
-Nią ogarnij nas, Amen.
-D           A
-Nią ogarnij nas, Amen.
-
-2.
-A               C                  D        A
-Obłoku jasny chroń nas przed gniewem złego,
-D               A
-Daj soli smak i światłu blask.
-A               C                  D          A
-Nie daj się ukryć miastu Boga przedwiecznego,
-D                   A
-Osłaniaj je, strzeż jego bram.
-
-Ref.
-A  E     fis          D          A
-Przybądź Święty Niepojęty, z Nieba na nas tchnięty Duchu,
-A               E          fis          D          A
-Rozpal Świętą, Niepojętą, z Nieba na nas tchniętą miłość,
-D           A
-Nią ogarnij nas, Amen.
-D           A
-Nią ogarnij nas, Amen.
-
-3.
-A               C             D         A
-Pocieszycielu radość Swą ześlij z Nieba,
-D                 A
-Wszak Dobry ją obiecał nam.
-A               C               D            A
-Przerwij milczenie w Imię Syna - Słowa - Chleba,
-D                   A
-Najświętsze tchnienie wołaj w nas.
-
-Ref.
-A        E          fis          D          A
-Przybądź Święty Niepojęty, z Nieba na nas tchnięty Duchu,
-A               E          fis          D          A
-Rozpal Świętą, Niepojętą, z Nieba na nas tchniętą miłość,
-D           A
-Nią ogarnij nas, Amen.
-A        E          fis          D          A
-Przybądź Święty Niepojęty, z Nieba na nas tchnięty Duchu,
-A               E          fis          D          A
-Rozpal Świętą, Niepojętą, z Nieba na nas tchniętą miłość,
-D           A
-Nią ogarnij nas, Amen.
-D           A
-Nią ogarnij nas, Amen.
-
-[Instrumental] 
-
-A               E          fis          D          A
-Witaj Święty Niepojęty, z Nieba na nas tchnięty Duchu,
-A               E          fis          D          A
-Rozpal Świętą, Niepojętą, z Nieba na nas tchniętą miłość,
-D           A
-Nią ogarnij nas, Amen.
-D           A
-Nią ogarnij nas, Amen.` },
+Języku ognia przyjdź i płoń w naszych sercach` },
   { title: "Przychodzisz, Panie",
     body: `F g7/F C A7+ A7
-Przychodzisz, Panie, mimo drzwi zamkniętych,
-d B7+ g7 A7 B C7
-Jezu Zmartwychwstały, ze śladami męki.
-F g7/F C A7+ A7
-Ty jesteś z nami, poślij do nas Ducha!
-d B7+ g7 A7 B7 A7 d
-Panie nasz i Boże, uzdrów nasze życie!` },
+Przychodzisz, Panie, mimo drzwi zamkniętych` },
   { title: "Przyjaciela mam",
     body: `C G a F
-Przyjaciela mam, co pociesza mnie,			
-Gdy o Jego ramię oprę się.
-W Nim nadzieję mam, uleciał strach.
-On najbliżej jest, zawsze troszczy się.
-Królów Król, z nami Bóg. /2x		 Jezus. /4x` },
+Przyjaciela mam, co pociesza mnie` },
   { title: "Psalm 126 - niemaGotu",
     body: `1.
 fis         cis          H         A           E
-Gdy Pan odmienił los Syjonu, wydawało się nam, że śnimy!
-fis         cis               H             A      E
-Usta nasze były pełne śmiechu, a język śpiewał z radości!
-
-Ref.
-H               A
-Mówiono wtedy między narodami:
-E              H
-„Wielkie rzeczy im Pan uczynił!”
-fis           A
-Pan uczynił nam wielkie rzeczy
-E   H          fis cis H A E
-i radość nas ogarnęła!
-
-2.
-fis             cis             H          A   E
-Ci, którzy we łzach sieją, żąć będą w radości;
-fis            cis           H              A
-choć idą i płaczą, niosąc ziarno na zasiew,
-E
-powrócą z radością, niosąc swoje snopy.
-
-Ref.
-H               A
-Powiedzą wtedy między narodami:
-E              H
-„Wielkie rzeczy im Pan uczynił!”
-fis           A
-Pan uczynił nam wielkie rzeczy
-E   H          fis cis H A E
-i radość nas ogarnęła!
-
-fis cis H A E
-Ooo… /2x
-
-Bridge:
-fis
-Odmień, Panie, nasz los!
-cis                      H
-Zamień suche doliny w strumienie rwące!
-fis
-Odmień, Panie, nasz los!
-cis                              H
-Niech nawiedzi nas z wysoka wschodzące Słońce!
-fis
-Odmień, Panie, nasz los!
-cis                          H
-Lament zamień w taniec! Rozpal znów, co gasnące!
-fis
-Odmień, Panie, nasz los!
-A        H        cis
-W Twoich rękach nasz los – odmień go!
-
-Ref.
-H                       A
-A zawsze mówić będą między narodami:
-E              H
-„Wielkie rzeczy im Pan uczynił!”
-fis           A
-Pan uczynił nam wielkie rzeczy
-E   H          fis cis H A E
-i radość nas ogarnęła!
-
-H                       A
-Niech mówią przeto między narodami:
-E              H
-„Wielkie rzeczy im Pan uczynił!”
-fis           A
-Pan uczynił nam wielkie rzeczy
-E   H          fis cis H A E
-i radość nas ogarnęła!` },
+Gdy Pan odmienił los Syjonu, wydawało się nam, że śnimy!` },
   { title: "Psalm 148",
     body: `Ref.
 a   G   F   E a
-Alleluja /4x
-
-1.
-a                 G        a
-Niech zabrzmi Panu chwała w niebiosach,
-G              C     G         a
-Na wysokościach cześć niech oddadzą,
-F               G          a
-Wielbijcie Pana Duchy niebieskie,
-a         e      a
-Wielbijcie Pana Jego zastępy.
-
-Ref.
-a   G   F   E a
-Alleluja /4x
-
-2.
-a               G          a
-Słońce, księżycu wielbijcie Pana,
-G               C        G         a
-Gwiazdy świecące wielbijcie Pana,
-F               G        a
-Niebiosa niebios wielbijcie Pana,
-a             e          a
-Wody podniebne wielbijcie Pana.
-
-Ref.
-a   G   F   E a
-Alleluja /4x
-
-3.
-a                  G        a
-Niech wszyscy wielbią imię Pana,
-G            C            G            a
-Bo Jego Słowo stwarza wciąż wszystko,
-F                G         a
-Bo tylko Jego imię jest wzniosłe,
-a                   e            a
-Niechaj na wieki brzmi Jego chwała.
-
-Ref.
-a   G   F   E a
-Alleluja /4x
-
-4.
-a               G     a
-On daje siłę swemu ludowi,
-G               C             G     a
-Z prochu podnosi swoich przyjaciół,
-F                 G         a
-Jest Bogiem bliskim dla Izraela,
-a               e          a
-Swoich wybranych On sam umacnia.
-
-Ref.
-a   G   F   E a
-Alleluja /4x
-
-5.
-a                 G            a
-Niech zabrzmi chwała Ojcu, co stwarza,
-G            C           G     a
-Jego Synowi, który jest Panem,
-F             G              a
-Duchowi, który w nas zamieszkuje,
-a               e           a
-Przez wszystkie wieki wieków. Amen.
-
-Ref.
-a   G   F   E a
 Alleluja /4x` },
   { title: "Psalm 63 – AdoNaj",
-    body: `
-	 
+    body: `Ref.
 D     	  A 	G		D
- h     		A            G D
-Ref.
-D     	  A 	G		D
-Boże, mój Boże, Ciebie szukam;
-    h     		A            G D
-I Ciebie pragnie moja dusza
-D     	A               	G  A 	h
-Boże, mój Boże, Ciebie szukam;
-    G    	 D	            A    D
-I Ciebie pragnie moja dusza
-	
-1.
-D A h
-za Tobą tęskni dusza, ciało me,
-G A D
-jak zeschła ziemia bez wody spragniona.
-D A h fis
-W świątyni patrzę na oblicze Twe,
-G D A
-Twoja potęga niech będzie ogłoszona!
-D A h
-Skoro Twa łaska lepsza jest od życia,
-G A D
-to moje wargi będą Ciebie sławić.
-D A h fis
-Tak błogosławię Ciebie w moim życiu:
-G D A
-I wzniosę ręce, by  Ciebie błogosławić.
-
-Ref.
-D     	  A 	G		D
-Boże, mój Boże, Ciebie szukam;
-    h     		A            G D
-I Ciebie pragnie moja dusza
-D     	A               	G  A 	h
-Boże, mój Boże, Ciebie szukam;
-    G    	 D	            A    D
-I Ciebie pragnie moja dusza
-
-2.
-D A h
-Będę się cieszył, jak w wesołe święta
-G A D
-radosnym śpiewem napełnię me usta,
-D A h fis
-gdy wspomnę Ciebie na moim posłaniu
-G D A
-myślę o Tobie podczas moich czuwań.
-D A h
-Dla mnie się stałeś jedyną pomocą
-G A D
-w cieniu Twych skrzydeł wołać chce z radości:
-D A h fis
-do Ciebie przylgnąć pragnę z całą mocą
-G D A
-prawica Twoja wspiera mnie w słabości.
-
-Ref.
-D     	  A 	G		D
-Boże, mój Boże, Ciebie szukam;
-    h     		A            G D
-I Ciebie pragnie moja dusza
-D     	A               	G  A 	h
-Boże, mój Boże, Ciebie szukam;
-    G    	 D	            A    D
-I Ciebie pragnie moja dusza
-
-[Bridge]
-D A h
-A wszyscy, którzy czyhają na me życie,
-G A D
-niech zejdą w głębiny ziemi.
-D A h fis
-będą wydani pod siekące miecze
-G D A
-Oni się staną łupem dla szakali.
-D A h fis
-Kto Bogu ufa, niech się w Nim raduje
-G D A
-A niech ucichnie, kto nie chce Go chwalić.
-
-Ref.
-D     	  A 	G		D
-Boże, mój Boże, Ciebie szukam;
-    h     		A            G D
-I Ciebie pragnie moja dusza
-D     	A               	G  A 	h
-Boże, mój Boże, Ciebie szukam;
-    G    	 D	            A    D
-I Ciebie pragnie moja dusza
-
-` },
+Boże, mój Boże, Ciebie szukam;` },
   { title: "Rozpięty na ramionach",
     body: `a C G F a E
-Ref. Rozpięty na ramionach jak sokół na niebie
-a C G F a E
-      Chrystusie, Synu Boga, spójrz, proszę, na ziemię.
-
-a F G a
-1. Na ruchliwe ulice, zabieganych ludzi,
-F G a E
-   Gdy noc się już kończy, a ranek się budzi.
-a F G a
-   Uśmiechnij się przyjaźnie z wysokiego krzyża
-F G a E
-   Do ciężko pracujących, których głód poniża.
-
-a C G F a E
-Ref. Rozpięty na ramionach jak sokół na niebie
-a C G F a E
-      Chrystusie, Synu Boga, spójrz, proszę, na ziemię.
-
-a F G a
-2. Pociesz zrozpaczonych, chleba daj głodującym,
-F G a E
- Modlących się wysłuchaj i wybacz umierającym.
-a F G a
-   O spójrz cierpliwie, sokole, na wszechświat, na ziemię,
-F G a E
-   Na cichy ciemny kościół, dziecko wzywające Ciebie.
-
-a C G F a E
-Ref. Rozpięty na ramionach jak sokół na niebie
-a C G F a E
-      Chrystusie, Synu Boga, spójrz, proszę, na ziemię.
-
-a F G a
-3. A gdy będziesz nas sądził, Boskie Miłosierdzie,
-F G a E
-   Prosimy, Twoje dzieci, nie sądź na miarę siebie.` },
+Ref. Rozpięty na ramionach jak sokół na niebie` },
   { title: "Schowaj mnie",
     body: `C G a F D G
-1. Schowaj mnie pod skrzydła Swe,
-C G a F d G
-   Ukryj mnie w silnej dłoni Swej.
-
-F G C
-Ref. Kiedy fale mórz chcą porwać mnie,
-F G a
-     Z Tobą wzniosę się, podniesiesz mnie,
-F G C
-     Panie, Królem Tyś spienionych wód,
-F G a (C)
-     Ja ufam Ci, Ty jesteś Bóg.
-
-2. Odpocznę dziś w ramionach Twych.
-   Dusza ma przy Tobie będzie trwać.` },
+1. Schowaj mnie pod skrzydła Swe` },
   { title: "Stoję dziś",
     body: `A E H cis
-Stoję dziś, swoje serce, ręce tak wyciągam
-W podziwie dla Tego, który wszystko dał!
-Stoję dziś, moją duszę, Panie, Tobie składam,
-Ja chcę być jak Ty` },
+Stoję dziś, swoje serce, ręce tak wyciągam` },
   { title: "Stwórca nasz - AdoNaj",
     body: `E
-Stwórca nasz i Król
-A
-Wszechmogący Bóg
-Fis H
-Chwałę dziś oddajmy Mu	x2
-
-A H
-Twoje jest światło – niech chwali Cię
-A H
-Niebo i morza - niech chwalą Cię
-A A H
-Twoja jest cała ziemia – niech Ci składa hołd
-
-A H
-Twoje są gwiazdy – niech chwalą Cię
-A H
-Wszelkie stworzenie – niech chwali Cię
-A H E
-Twoja jest moja dusza – niech Ci składa hołd
-
-E
-Stwórca nasz i Król
-A
-Wszechmogący Bóg
-Fis H (E)
-Chwałę dziś oddajmy Mu	x2` },
+Stwórca nasz i Król` },
   { title: "Święty na zawsze",
-    body: `Wstęp:
-G C G e D C
-1.
-G C G
-Kolejne pokolenia od wieków wielbią Ciebie
-e D C
-Śpiewając pieśni chwały na Twą cześć.
-G C G
-Śpiewali Ci przed nami, następni śpiewać będą
-e D C
-Nie ucichną pieśni na Twą cześć.
-Refren 1:
-C D
-Twe imię jest najwyższe, Twe imię jest największe
-e C
-Twe imię ponad wszystkim jest.
-C D
-Nad królów panowaniem, ich mocą i władaniem
-e C
-Twe imię ponad wszystkim jest!
-Refren 2:
-C D
-Pieśń aniołów brzmi - „Święty!”
-G e
-Wszystko śpiewa dziś - „Święty!”
-a D
-Wywyższamy Cię - „Święty!
-G
-Święty na zawsze!”
-2.
-G C G
-Jeśli krew baranka zmyła twoje winy
-e D C
-Śpiewaj najwyższemu chwały pieśń.
-G C G
-Jeśli dał ci wolność i nosisz Jego imię,
-e D C
-Śpiewaj nieustannie chwały pieśń.
-e D C
-Śpiewamy pieśni chwały na Twą cześć!
-Refren 2:
-C D
-Pieśń aniołów brzmi - „Święty!”
-G e
-Wszystko śpiewa dziś - „Święty!”
-a D
-Wywyższamy Cię - „Święty!
-G
-Święty na zawsze!”
-Refren 3:
-C D
-Śpiewa Boży lud - „Święty!”
-G e
-To nasz królów Król - „Święty!”
-a D
-Już do końca dni - „Święty!
-G
-Święty na zawsze!”
-Refren 1:
-C D
-Twe imię jest najwyższe, Twe imię jest największe
-e C
-Twe imię ponad wszystkim jest.
-C D
-Nad królów panowaniem, ich mocą i władaniem
-e C
-Twe imię ponad wszystkim jest!
-Refren 2:
-C D
-Pieśń aniołów brzmi - „Święty!”
-G e
-Wszystko śpiewa dziś - „Święty!”
-a D
-Wywyższamy Cię - „Święty!
-G
-Święty na zawsze!”
-Refren 3:
-C D
-Śpiewa Boży lud - „Święty!”
-G e
-To nasz królów Król - „Święty!”
-a D
-Już do końca dni - „Święty!
-G
-Święty na zawsze!”
-Bridge: (x2)
-D a
-Święty, Święty, Święty jest Pan Bóg Wszechmogący
-C G
-On był i jest i przyjdzie znów.
-D a
-Z całym stworzeniem śpiewam: Królowi Królów cześć!
-C G D
-Tyś wszystkim dla mnie jest i pragnę uwielbiać Cię!` },
+    body: `G C G
+Kolejne pokolenia od wieków wielbią Ciebie` },
   { title: "Święty, Święty, Święty - TGD",
     body: `a7 C/E G C/E d/F e/G
-Święty, Święty, Święty
-a7 C/E G C/E d/F D4 D
-Pan Bóg Wszechmocny,
-d7 C/E d/F e/G
-Który był i jest
-a7 C/E
-i przyjdzie znów
-d/F D/Fis
-Oddajmy mu cześć,
-C/G G F/A
-pokłońmy się Mu` },
+Święty, Święty, Święty` },
   { title: "Tak mnie skrusz",
     body: `d
-Tak mnie skrusz,
-Tak mnie złam,
-F
-Tak mnie wypal, Panie,
-C d A
-Byś został tylko Ty, byś został tylko Ty jedynie Ty!` },
+Tak mnie skrusz, Tak mnie złam` },
   { title: "Taki jesteś Ty (Wszechmocny)",
     body: `Wstęp:
 D A E fis
 D A E fis
+
 Zwrotka 1:
 D A
 Jesteś tu, jesteś pośród nas
@@ -3330,14 +1146,7 @@ D A
 Jesteś tu, działasz w każdym z nas
 E fis
 Uwielbiam Cię, uwielbiam Cię
-D A
-Jesteś tu, jesteś pośród nas
-E fis
-Uwielbiam Cię, uwielbiam Cię
-D A
-Jesteś tu, działasz w każdym z nas
-E fis
-Uwielbiam Cię, uwielbiam Cię
+
 Refren:
 D
 Jesteś Wszechmocny, Ty czynisz cuda
@@ -3345,12 +1154,7 @@ A E
 Jesteś drogą, światłem w ciemności, o tak
 fis
 Taki jesteś Ty
-D
-Jesteś Wszechmocny, Ty czynisz cuda
-A E
-Jesteś drogą, światłem w ciemności, o tak
-fis
-Taki jesteś Ty
+
 Zwrotka 2:
 D A
 Jesteś tu i dotykasz serc
@@ -3361,1222 +1165,233 @@ Jesteś tu, leczysz każde z serc
 E fis
 Uwielbiam Cię, uwielbiam Cię (jesteś tu)
 D A
-Jesteś tu, zmieniasz życie me (zmieniasz życie me)
-E
-Uwielbiam Cię (uwielbiam Cię)
-fis
-Uwielbiam Cię (uwielbiam Cię)
-D A
-Jesteś tu i odnawiasz mnie
+Jesteś tu, zmieniasz życie me
 E fis
-Uwielbiam Cię, uwielbiam Cię
-Refren:
-D
-Wszechmocny, Ty czynisz cuda
-A E
-Jesteś drogą, światłem w ciemności, o tak
-fis
-Taki jesteś Ty (Ty jesteś... Ty jesteś!)
-D
-Wszechmocny, Ty czynisz cuda
-A E
-Jesteś drogą, światłem w ciemności, o tak
-fis
-Taki jesteś Ty (jesteś!)
-D
-Wszechmocny, Ty czynisz cuda
-A E
-Jesteś drogą, światłem w ciemności, o tak
-fis
-Taki jesteś Ty (jesteś Ty jesteś!)
-D
-Wszechmocny, Ty czynisz cuda
-A E
-Jesteś drogą, światłem w ciemności, o tak
-fis
-Taki jesteś Ty
-Coda 1:
-D
-Taki jesteś Ty (taki jesteś)
-A
-Taki jesteś Ty (taki jesteś)
-E
-Taki jesteś Ty
-fis
-Taki jesteś Ty (mój Jezu)
-D
-Taki jesteś Ty
-A
-Taki jesteś Ty
-E
-Taki jesteś Ty
-fis
-Taki jesteś Ty
-D A E fis
-Mój Jezu, Mój Jezu, taki jesteś
-Bridge: (x4)
-D
-Choć czasem tego nie widzę, Ty działasz
-A
-Choć czasem tego nie czuję, Ty działasz
-E
-Nie zmieniasz się i wiem, że wciąż działasz
-fis
-Nie zmieniasz się i wiem, że wciąż działasz
-Refren:
-D
-Wszechmocny, Ty czynisz cuda
-A E
-Jesteś drogą, światłem w ciemności, o tak
-fis
-Taki jesteś Ty, taki jesteś, Ty jesteś!
-D
-Wszechmocny, Ty czynisz cuda
-A E
-Jesteś drogą, światłem w ciemności, o tak
-fis
-Taki jesteś Ty
-Coda 2:
-D
-Taki jesteś Ty
-A
-Taki jesteś Ty
-E
-Taki jesteś Ty
-fis
-Taki jesteś Ty mój Jezu
-D
-Taki jesteś Ty
-A
-Taki jesteś Ty (jesteś Ty)
-E
-Taki jesteś Ty
-fis
-Taki jesteś Ty (Ty jesteś)
-Refren:
-D
-Jesteś Wszechmocny, Ty czynisz cuda
-A E
-Jesteś drogą, światłem w ciemności, o tak
-fis
-Taki jesteś Ty
-D
-Jesteś Wszechmocny, Ty czynisz cuda
-A E
-Jesteś drogą, światłem w ciemności, o tak
-fis D
-Taki jesteś Ty` },
-  { title: "To i ja - Hillsong UNITED",
-    body: `ZWROTKA 1
-E
-Stwórco istnienia
-gis
-Zanim był czas
-Fis E (gis Fis)
-Zanim rozpoczął się świat
-E
-Gdzie chaos i ciemność
-gis
-Na dźwięk Twoich słów
-Fis E (H Fis)
-Nagle pojawił się blask
+Uwielbiam Cię, uwielbiam Cię` }
+  ];
 
-REFREN 1
-H
-I na Twój głos
-H gis Fis
-Galaktyk sto miliardów rodzi się
-Fis H E
-A oddech Twój początkiem planet jest
-gis Fis H
-Jeśli gwiazdy Ciebie wielbią, to i ja
-H gis Fis
-Widzę serce Twoje w każdym z Twoich dzieł
-Fis
-Światło wszystkich gwiazd
-H E
-Odbiciem łaski jest
-gis Fis H
-Jeśli wszechświat Ciebie chwali, to i ja
-H gis Fis
-To i ja
-(Fis H)
-ZWROTKA 2
-E
-Boże obietnic
-gis
-Twe słowo ma moc
-Fis E (gis Fis)
-Na wieki nie zmieni się już
-E gis
-Ty raz przemówiłeś nauka i świat
-Fis E (H Fis)
-Idą za dźwiękiem Twych słów
-
-REFREN 2
-H
-I na Twój głos
-H gis Fis
-Ze sto miliardów stworzeń bierze wdech
-Fis H E
-By Twój odwieczny plan wypełnił się
-gis Fis H
-Jeśli to objawia Ciebie, to i ja
-H gis Fis
-Widzę serce Twoje w każdym z Twoich dzieł
-Fis
-Niebo pełne barw
-H E
-Obrazem łaski jest
-gis Fis H
-Jeśli wszystko słucha Ciebie, to i ja
-H gis Fis (Fis H)
-To i ja
-BRIDGE
-E gis Fis
-Jeśli gwiazdy Ciebie wielbią, to i ja
-E gis Fis
-Jeśli góry się kłaniają, to i ja
-E gis Fis
-Jeśli morza głoszą chwałę, to i ja
-E gis Fis
-Jeśli wszystko Cię wywyższa, Stwórco nasz
-E gis Fis
-To i ja
-
-E gis Fis
-Jeśli wiatr Ci jest posłuszny, to i ja
-E gis Fis
-Jeśli kamień głos podnosi, to i ja
-E gis Fis
-Wiem, że więcej niż to wszystko jesteś wart
-E gis Fis
-Więc zaśpiewam na Twą chwałę jeszcze raz
-E gis Fis
-ooo	x2
-Uwielbiony bądź, Błogosławiony bądź x2
-
-ZWROTKA 3
-E gis Fis
-Boże zbawienia
-Znalazłeś mnie, gdy
-E gis Fis
-Zgubiła mnie duma i grzech
-E gis Fis
-Na górze cierpienia
-Jedyny Twój Syn
-Był za mnie wydany na śmierć 				E ( H Fis)
-
-REFREN 3
-H
-I na Twój głos
-H gis Fis
-Ze sto miliardów błędów znika gdzieś
-Fis H E
-Życia zrzekłeś się, by mi darować je
-gis Fis H
-Jeśli Ty powstałeś z martwych, to i ja
-H gis Fis
-Widzę serce Twoje w każdej z Twoich ran
-Fis H E
-Arcydzieło Twe na imię Miłość ma
-gis Fis H
-Jeśli Ty się uniżyłeś, to i ja
-H
-Widzę serce Twe
-gis Fis
-W miliardach wszystkich nas
-Fis
-Każdy cenny jest
-H E
-Imiona wszystkich znasz
-gis Fis H
-Jeśli żyłeś, żeby kochać, to i ja
-H gis Fis
-Wiem, że zrobiłbyś to wszystko jeszcze raz
-Fis H E
-Ukochałeś nas już zanim powstał świat
-gis Fis H
-Ty byś wszystko oddał za jednego z nas` },
-  { title: "Ty obecny wśród nas - Mocni w Duchu",
-    body: `
-	E                             A2
-1.On odpuszcza każdy mój grzech – miłosierny jest.
-  E                              A2
-Każdy smutek zamienia w śmiech – zna liczbę moich łez.
-  E                          A2
-Twoje święte Ciało i Krew otwiera mi oczy.
-  E                         A2
-Widzę uśmiech łagodny Twój, teraz i tu.
-
-  H                    cis       H                    cis
-Odnawiasz moje siły jak orła, jak młodego orła do lotu porywasz mnie.
-  H                    cis    H
-Odnawiasz moje siły od nowa, dajesz mi moc i podnosisz mnie!
-
-Ref.
-			A              cis
- 	 To Ty, obecny wśród nas,
-     H             fis
-     Twoja chwała zstępuje, Twoja chwała ogarnia nas.
-     A              cis
-     To Ty, obecny wśród nas,
-     H                A
-     Twoją miłość przyjmuję. Teraz jest łaski czas.
-     A              cis
-     To Ty, obecny wśród nas,
-     H             fis
-     Twoja chwała zstępuje, Twoja chwała uwalnia nas.
-     A              cis
-     To Ty obecny wśród nas
-     H                A
-     Twoją miłość przyjmuję. Jesteś tu..
-
-  E                             A2
-2.On z choroby uzdrawia mnie – tak potężny jest.
-  E                             A2
-Każdą ciemność rozjaśnić chce – nadzieją zmienia mnie.
-  E                           A2
-Twoje święte Słowo i Krzyż wskazują mi drogę.
-  E                         A2
-Zmartwychwstałeś i żyjesz dziś, teraz i tu.
-
-  H                    cis       H                    cis
-Odnawiasz moje siły jak orła, jak młodego orła do lotu porywasz mnie.
-  H                    cis    H
-Odnawiasz moje siły od nowa, dajesz mi moc i podnosisz mnie!
-
-     Ref.
-			A              cis
- 	 To Ty, obecny wśród nas,
-     H             fis
-     Twoja chwała zstępuje, Twoja chwała ogarnia nas.
-     A              cis
-     To Ty, obecny wśród nas,
-     H                A
-     Twoją miłość przyjmuję. Teraz jest łaski czas. /x2
-
-BRIDGE
-  A                 cis        H           A
-Uwielbiam, nie zapominam - tyle dajesz mi codziennie.
-  A                 cis        H           fis
-Uwielbiam, nie zapominam - tyle dajesz mi swej łaski.
-  A                 cis        H           A
-Uwielbiam, nie zapominam - tyle dajesz mi codziennie.
-  A                 cis        H
-Uwielbiam, nie zapominam - tyle dajesz mi...
-			(Uwielbiamy Ciebie!
-			Wywyższamy Ciebie!
-			Jesteś obecny, wypełnij sobą świat!
-			Uwielbiamy Ciebie!
-			Wywyższamy Ciebie!
-			Jesteś obecny tu, mój Pan
-			Jesteś tu obecny!
-
-Ref.
-			A              cis
- 	 To Ty, obecny wśród nas,
-     H             fis
-     Twoja chwała zstępuje, Twoja chwała ogarnia nas.
-     A              cis
-     To Ty, obecny wśród nas,
-     H                A
-     Twoją miłość przyjmuję. Teraz jest łaski czas. /x2
-			
-			` },
-  { title: "Ty Światłość Dnia - Tim Hughes",
-    body: `1.
-D            A                   G
-Ty światłość dnia wszedłeś w moje ciemności,
-D        A          G
-dałeś mi wzrok, abym mógł
-D          A       G
-widzieć Twą Twarz i Spojrzenie Miłości,
-D            A          G
-którym roztapiasz mój strach
-
-Ref.
-D                   A
-Jestem tu, by wielbić, by oddawać chwałę,
-h                   G
-jestem tu, by wyznać: to mój Bóg.
-D                 A
-dobry i łaskawy, cały tak wspaniały,
-h                   G
-ponad wszystko cenny dla mnie jest. /2x
-
-2.
-D        A              G
-Ty czasów Król, wywyższony na wieki,
-D          A            G
-jaśnieje w Niebie Twój tron
-D           A         G
-zszedłeś na ziemię, by stać się człowiekiem,
-D           A          G
-by rajem stał się mój dom
-
-Ref.
-D                   A
-Jestem tu, by wielbić, by oddawać chwałę,
-h                   G
-jestem tu, by wyznać: to mój Bóg.
-D                 A
-dobry i łaskawy, cały tak wspaniały,
-h                   G
-ponad wszystko cenny dla mnie jest. /2x
-A D G
-I niczym nie odpłacę się
-za miłość Twą i za Twój Krzyż! x3
-
-D A h G
-Wezwij Imię Twojego Pana, i On zbawi Cię!    x4
-
-D A
-Ref. Jestem tu, by wielbić, by oddawać chwałę,
-h G
-   jestem tu, by wyznać: to mój Bóg.
-dobry i łaskawy, cały tak wspaniały,
-ponad wszystko cenny dla mnie jest. x2` },
-  { title: "Ukojenie",
-    body: `F7+ G A4 a
-Tylko w Bogu moje jest zbawienie,
-F7+ G C4 C
-W Nim jedynie duszy ukojenie,
-D/Fis G C/E F
-Moja chwała i skała,
-d7 e7 G A
-W Nim pokładam mą nadzieję.
-F7+ G A4 a
-Ufaj Mu, Kościele, w każdym czasie
-F7+ G C4 C
-Wylewajcie przed Nim serca wasze.
-D/Fis G C/E F
-Ludzie lżejsi niż tchnienie,
-d7 e7 G A
-Tylko w Bogu jest zbawienie.
-x2
-
-F7+ G4 G
-Sprawiedliwy jest nasz Pan,
-a C/E
-Każdy zbierze to, co siał,
-F7+ G4 G D
-Kto uwierzy nie zawiedzie się.
-F7+ G4 G
-Przychodzimy przed Twój tron,
-a C/E
-Chcemy widzieć Twoją moc
-F7+ G4 G A
-I doświadczyć, Panie, łaski Twej.
-x2` },
-  { title: "Umiłowany (Uwielbiamy Cię)",
-    body: `D h G9 D/ Es cm As Es (oryg.)
-Ref. Uwielbiamy Cię, uwielbiamy Cię, nasz Jedyny, Umiłowany. x2
-
-A G D A/ B As Es B
-1. Kto zawsze pierwszy szuka nas? Tylko Ty, Jezu Ty!
-Znajduje gdzie się kończy świat? Tylko Ty.
-Kto po nas w ciemność schyla się? Tylko Ty, Jezu Ty!
-Podnosi do godności córek, synów? Tylko Ty, Jezu Ty.
-
-D h G9 D/ Es cm As Es (oryg.)
-Ref. Uwielbiamy Cię, uwielbiamy Cię, nasz Jedyny, Umiłowany.
-
-A G D A/ B As Es B
-2. Kto w swoich dłoniach trzyma nas? Tylko Ty, Jezu Ty!
-Kto chroni nasze życie i jest nam wierny? Tylko Ty.
-
-D h G9 D/ Es cm As Es (oryg.)
-Ref. Uwielbiamy Cię, uwielbiamy Cię, nasz Jedyny, Umiłowany. x2
-
-Bridge:
-G D/ As Es
-Nawet jeśli ciemność wielka nas zakryje,
-A G/ B As
-przecież dla Ciebie noc jest jasna tak jak dzień.
-Nigdy nas nie zgubisz, ani na chwilę,
-przecież dla Ciebie noc jest jasna tak jak dzień.` },
-  { title: "Uwielbiajcie Pana",
-    body: `d C d a d C
-Uwielbiajcie Pana, ludzkich serc bijące dzwony,
-d C d a d C
-Padnij na kolana przed Nim ludu utrudzony.
-F G F A
-On osuszy twoje łzy, On ratunkiem będzie ci,
-d C d C d
-U Jego stóp padnie wróg, bo On Bóg niezwyciężony.
-F G d A
-Niepojęty w swej mądrości, Święty, Święty Bóg miłości,
-d C d C d
-Śpiewaj Panu, ziemio, chwalcie wszystkie świata strony.` },
-  { title: "Uwielbiam imię Twoje Panie",
-    body: `G C D
-Uwielbiam imię Twoje Panie
-G C D
-Wywyższam Cię i daję Ci hołd
-e C
-W przedsionku chwały Twej staję
-a D
-Z radością śpiewam Ci pieśń.
-
-G C D
-O Panie Jezu chcę wyznać że
-G C D
-Ja kocham Ciebie Ty zmieniasz mnie
-G C D
-Chcę Ci dziękować ze wszystkich sił
-e D
-Dajesz mi siebie bym na wieki żył.` },
-  { title: "Wdzięczność (Gratitude) - Brandon Lake",
-    body: ` ZWROTKA 1
-F
-Jakich użyć słów
-d
-Jak wyrazić to
-C
-Jak opisać mam
-B
-Całą wdzięczność mą
-
-ZWROTKA 2
-F
-Mogę śpiewać Ci
-d
-Co dzień inną pieśń
-C
-Chociaż czuję, że
-B
-To tak mała rzecz
-
-REFREN
-F
-Więc podnoszę me ręce
-C
-I znowu oddaję Ci cześć
-Bo wszystko, co mam dziś
-B d C
-To alleluja, alleluja
-F
-Nie wiem, co mogę dać
-C
-Z czego mógłby ucieszyć się Król
-Prócz serca, co śpiewa Mu
-B d C F
-Alleluja, alleluja
-
-ZWROTKA 3
-F
-To, co mogę dać
-d
-To ta jedna rzecz
-C
-Z całych moich sił
-B
-Będę wielbić Cię
-
-REFREN
-F
-Więc podnoszę me ręce
-C
-I znowu oddaję Ci cześć
-Bo wszystko, co mam dziś
-B d C
-To alleluja, alleluja
-F
-Nie wiem, co mogę dać
-C
-Z czego mógłby ucieszyć się Król
-Prócz serca, co śpiewa Mu
-B d C F
-Alleluja, alleluja
-
-BRIDGE
-F
-O, duszo ma, nie milcz już więcej
-C
-I podnieś swój głos, bo lew w tobie drzemie
-B
-Twój Bóg dał ci moc
-F C
-Powstań, uwielbij Go   x2
-
-REFREN
-F
-Więc podnoszę me ręce
-C
-I znowu oddaję Ci cześć
-Bo wszystko, co mam dziś
-B d C
-To alleluja, alleluja
-F
-Nie wiem, co mogę dać
-C
-Z czego mógłby ucieszyć się Król
-Prócz serca, co śpiewa Mu
-B d C F
-Alleluja, alleluja
-
-OUTRO
-F Es B b
-(Alleluja)` },
-  { title: "Wielbię Ciebie",
-    body: `Wielbię Ciebie w każdym momencie,
-O żywy chlebie nasz w tym sakramencie,
-O żywy chlebie nasz w tym sakramencie.
-` },
-  { title: "Wierzę w Ciebie Panie",
-    body: `1.
-d B C a
-Wierzę w Ciebie, Panie, coś mnie obmył z win,
-d B C F
-Wierzę, że człowiekiem stał się Boży Syn.
-g C F B
-Miłość Ci kazała krzyż na plecy brać,
-g C F A7
-W tabernakulum zostałeś, aby z nami trwać
-g C F B
-Jesteś przewodnikiem nam do wieczności bram,
-g C A7 d
-Tam przygarniesz nas do Siebie.
-2.
-d B C a
-Tyś jest moim życiem, boś Ty żywy Bóg,
-d B C F
-Tyś jest moją drogą, najpiękniejszą z dróg.
-g C F B
-Tyś jest moją prawdą, co oświeca mnie,
-g C F A7
-Boś odwiecznym Synem Ojca, który wszystko wie.
-g C F B
-Nic mnie nie zatrwoży już wśród najcięższych burz,
-g C A7 d
-Bo Ty, Panie, jesteś ze mną.
-3.
-d B C a
-Tyś jest moją siłą, w Tobie moja moc.
-d B C F
-Tyś jest mym pokojem w najburzliwszą noc,
-g C F B
-Tyś jest mym ratunkiem, gdy zagraża zło,
-g C F A7
-Moją słabą ludzką rękę ujmij w swoją dłoń.
-g C F B
-Z Tobą przejdę poprzez świat w ciągu życia lat
-g C A7 d
-I nic złego mnie nie spotka.
-4.
-d B C a
-W Tobie, Boże, miłość, wiarę swoją dam.
-d B C F
-W Tobie, Synu Boży, ufność swoją mam
-g C F B
-Duchu Święty, Boże, w serce moje zstąp
-g C F A7
-I miłość Bożej ziarno rzuć w me serce w głąb.
-g C F B
-W duszy mojej rozpal żar, siedmioraki dar,
-g C A7 d
-Daj mi stać się Bożą rolą.` },
-  { title: "Witaj, Pokarmie",
-    body: `1.
-e      h         C           D
-Witaj, Pokarmie, w którym niezmierzony
-e       h        C          D
-Nieba i ziemie Twórca jest zamkniony,
-G      D      a        D
-Witaj, napoju zupełnie gaszący
-G     h   e
-Umysł pragnący.
-
-2.
-e            h        C         D
-Witaj krynico wszystkiego dobrego
-e           h          C    D
-Gdy bowiem w sobie masz Boga samego
-G          D       a               D
-Znasz ludziom wszystkie Jego wszechmocności
-G       h  e
-Niesiesz godności.
-
-3.
-e          h        C      D
-Witaj z niebiosów manno padająca
-e           h           C           D
-Rozkoszny w sercu naszym smak czyniąca:
-G          D        a             D
-Wszystko na świecie co jedno smakuje
-G        h  e
-W tym się najduje.
-
-4.
-e              h       C        D
-Witaj rozkoszne z ogrodu rajskiego
-e           h            C       D
-Drzewo owocu pełne żywiącego:
-G          D        a            D
-Kto cię skosztuje śmierci się nie boi
-G         h   e
-Choć nad nim stoi.
-
-5.
-e            h       C          D
-Witaj Jedyna serc ludzkich radości
-e         h          C        D
-Witaj strapionych wszelka łaskawości
-G          D    a            D
-Ciebie dziś moje łzy słodkie szukają
-G       h   e
-K'Tobie wołają.` },
-  { title: "Wszyscy ludzie klaszczą w dłonie",
-    body: `C G D e
-Ref. Wszyscy ludzie klaszczą w dłonie
-cała ziemia śpiewa, śpiewa
-Wielka radość na Syjonie
-Król zstępuje z nieba, z nieba x2
-
-Nadejdzie dzień, nadejdzie dzień
-Zobaczy to (zobaczy to) każdy z nas
-Nadejdzie dzień, nadejdzie dzień
-Uwielbi Go (uwielbi Go) cały świat
-
- C G D e
-Ref. Wszyscy ludzie klaszczą w dłonie
-cała ziemia śpiewa, śpiewa
-Wielka radość na Syjonie
-Król zstępuje z nieba, z nieba x2` },
-  { title: "Wzywam Cię Duchu przyjdź",
-    body: `G A h G A h
-Wzywam Cię Duchu przyjdź
-G A h G A D
-Czekam wciąż byś dotknął mnie
-G A h G A h
-Wołam Cię Panie przyjdź
-G A h G A D
-Jezu Zbawco do dzieci Twych
-
-G A h
-Ref. Jak spragniona ziemia rosy
-G A h
-dusza ma
-G A h
-Tylko Ty możesz wypełnić
-G A h G A D
-Serca głód, serca głód   x2` },
-  { title: "Yeshua (Ukochany mój)",
-    body: `[Zwrotka]
- e  C 
-Ukochany mój, najpiękniejszy jest, 
- G  D 
-Ze wszystkich, ze wszystkich.  x2
-
-[Refren]
- C  Dsus2  e  h 
-Yeshuuuuua aaaaaea aaaahaaa   x2
-
-[Zwrotka]
- e  C 
-Ukochany mój, najpiękniejszy jest, 
- G  D 
-Ze wszystkich, ze wszystkich.  x2
-
-[Refren]
- C  Dsus2  e  h 
-Yeshuuuuua aaaaaea aaaahaaa  x6
-
-[Bridge]
-e
-Twoja jest władza, 
-C
-Twoje królestwo, 
-G
-Twoja jest chwała, 
-D
-Na zawsze amen. 
-x4
-
-[Refren]
- C  Dsus2  e  h 
-Yeshuuuuua aaaaaea aaaahaaa  x4` },
-  { title: "Z Tobą ciemność",
-    body: `Fis h A D G Fis
-Z Tobą ciemność nie będzie ciemna wokół mnie
-h A D e6 Fis5/4 Fis5
-A noc tak jak dzień zajaśnieje.` },
-  { title: "Zapisane – AdoNaj",
-    body: `[Recytacja / Iz 49, 15-16]
-a F C G a
-Czy może kobieta zapomnieć o swym niemowlęciu?
-Czy może nie miłować dziecka swego łona?
-Lecz gdyby nawet ona zapomniała,
-Ja nie zapomnę o tobie!
-Oto wyryłem cię na moich dłoniach.
-1.
-a F C G
-Moje grzechy zapisane na piasku
-a F C G
-Zmyłeś Panie falą swej łaski
-a F C G
-Moje imię zapisałeś na dłoniach
-a F C G
-By mnie widzieć, kiedyś konał.
-Refren:
-d a
-Panie, przyjmij mą nędzę
-E a A7
-Zapisz me imię w Życia Księdze
-d a
-Panie, przyjmij mą nędzę
-E a
-Gdzie Twe Serce, tam me będzie.
-Mostek:
-C G
-Już na zawsze moje imię
-a F
-zapisane w Sercu Twym
-a F G C
-Już na zawsze Twoje Imię
-a F G C
-Zapisane w sercu mym.
-2.
-a F C G
-Moje grzechy zapisane na piasku
-a F C G
-Zmyłeś Panie falą swej łaski
-a F C G
-Moje imię zapisałeś na dłoniach
-a F C G
-By mnie widzieć, kiedyś konał.` },
-  { title: "Zawierzenie - AdoNaj",
-    body: `Wstęp:
-C C7 G9 G
-a a7 F
-Przyjmij me ciało, duszę i ducha,
-C C7 G9 G
-Twojego Słowa
-a a7 F
-pragnę dziś słuchać.
-a a7 F
-Me życie teraz oraz w wieczności,
-C C7 G9 G
-Przyjmij i zanurz
-a a7 F
-w swojej miłości.
-a a7 F
-Przyjmij mój rozum, uczucia, wolę,
-C C7 G9 G
-One od dzisiaj
-a a7 F
-niech będą Twoje.
-a a7 F
-Wszystko czym jestem, co mnie stanowi,
-C C7 G9 G
-Niech Twoja łaska
-a a
-we mnie odnowi.
-
-Refren:
-a7 d d7
-O Panie mój! O Adonai!
-F9 E E7 a a
-Tyś jest mój Bóg, Ty we mnie trwaj!
-a7 d d7
-O Panie mój! O Adonai!
-F9 E E7 a
-Tyś jest mój Bóg, Ty we mnie trwaj!` },
-  { title: "Ziemia",
-    body: `G C D G C D
-Ziemia, którą mi dajesz nie jest fikcją ani bajką
-G C D G C D
-Wolność, którą mam w Tobie jest prawdziwa x2
-Ref. 
-G D
- Będę tańczył przed Twoim tronem i oddam Tobie chwałę
-e C G D
-I nic już nie zamknie mi ust
-G D
-Żaden mur i żadna ściana, największa nawet tama
-e C G D
-Już nie, nie zatrzyma mnie już
-
-G C D G C D
-2. Większy, większy jest we mnie Ten, który mnie umacnia!
-G C D G C D
-Żaden Goliat nie może z nim równać się!
-
-Ref. 
-G D
- Będę tańczył przed Twoim tronem i oddam Tobie chwałę
-e C G D
-I nic już nie zamknie mi ust
-G D
-Żaden mur i żadna ściana, największa nawet tama
-e C G D
-Już nie, nie zatrzyma mnie jużx2` },
-  { title: "Zmartwychwstał Pan i żyje dziś",
-    body: `e C
-Ref.: Zmartwychwstał Pan i żyje dziś,
-G D
-blaskiem jaśnieje noc
-e C
-Nie umrę, nie lecz będę żył,
-G D
-Pan okazał swą moc
-a e
-Krzyż to jest brama Pana,
-G D
-jeśli chcesz przez nią wejdź
-a e
-Zbliżmy się do ołtarza,
-G D
-Bogu oddajmy cześć.
-
-e D G a H7
-1. Dzięki składajmy Mu, bo wielka jest jego łaska
-e D G a H7
-Z grobu powstał dziś Pan, a noc jest pełna blasku
-e D G a H7
-Chcę dziękować Mu i chcę Go dziś błogosławić
-e D G a H7
-Jezus, mój Pan i Bóg, On przyszedł aby nas zbawić.
-
-e D G a H7
-2. Lepiej się uciec do Pana, niż zaufać książętom
-e D G a H7
-Pan, moja moc i pieśń, podtrzymał gdy mnie popchnięto
-e D G a H7
-Już nie będę się bał – cóż może zrobić mi śmierć?
-e D G a H7
-Nie, nie lękam się i śpiewam chwały pieśń.` }
-];
-
-  const listContainer = document.getElementById('listContainer');
-  const searchInput = document.getElementById('search');
-  const clearBtn = document.getElementById('clearBtn');
-  const countEl = document.getElementById('count');
-  const detailView = document.getElementById('detail-view');
-  const detailTitle = document.getElementById('detailTitle');
-  const songBody = document.getElementById('song-body');
-  const backBtn = document.getElementById('backBtn');
-  const fontMinus = document.getElementById('fontMinus');
-  const fontPlus = document.getElementById('fontPlus');
-  const addToPlaylistBtn = document.getElementById('addToPlaylistBtn');
-
-  const tabSongs = document.getElementById('tabSongs');
-  const tabPlaylists = document.getElementById('tabPlaylists');
-  const songsHeaderExtra = document.getElementById('songsHeaderExtra');
-  const songsPane = document.getElementById('songsPane');
-  const playlistsPane = document.getElementById('playlistsPane');
-  const playlistsContainer = document.getElementById('playlistsContainer');
-  const newPlaylistBtn = document.getElementById('newPlaylistBtn');
-  const syncBtn = document.getElementById('syncBtn');
-
-  const playlistDetailView = document.getElementById('playlist-detail-view');
-  const pldBackBtn = document.getElementById('pldBackBtn');
-  const pldTitleBtn = document.getElementById('pldTitleBtn');
-  const pldDeleteBtn = document.getElementById('pldDeleteBtn');
-  const playlistSongsContainer = document.getElementById('playlistSongsContainer');
-  const pldAddSongBtn = document.getElementById('pldAddSongBtn');
-
-  const playlistPickerView = document.getElementById('playlist-picker-view');
-  const pickerBackBtn = document.getElementById('pickerBackBtn');
-  const pickerListContainer = document.getElementById('pickerListContainer');
-  const pickerSearch = document.getElementById('pickerSearch');
-  const pickerClearBtn = document.getElementById('pickerClearBtn');
-
-  const quickAddBackdrop = document.getElementById('quickAddBackdrop');
-  const quickAddSongTitle = document.getElementById('quickAddSongTitle');
-  const quickAddList = document.getElementById('quickAddList');
-  const quickAddNewBtn = document.getElementById('quickAddNewBtn');
-
-  const customDialogBackdrop = document.getElementById('customDialogBackdrop');
-  const customDialogMessage = document.getElementById('customDialogMessage');
-  const customDialogInput = document.getElementById('customDialogInput');
-  const customDialogCancel = document.getElementById('customDialogCancel');
-  const customDialogOk = document.getElementById('customDialogOk');
-
-  function normalize(s){
-    return s.toLowerCase()
-      .replace(/ą/g,'a').replace(/ć/g,'c').replace(/ę/g,'e').replace(/ł/g,'l')
-      .replace(/ń/g,'n').replace(/ó/g,'o').replace(/ś/g,'s').replace(/ź/g,'z').replace(/ż/g,'z');
-  }
-
-  const songsIndexed = SONGS.map((s,i) => ({...s, idx:i, norm: normalize(s.title)}));
-  const titleToIdx = {};
-  songsIndexed.forEach(s => { titleToIdx[s.title] = s.idx; });
-
+  // Helper: Bezpieczne kodowanie HTML
   function escapeHtml(str){
-    return str.replace(/[&<>"']/g, c => ({
-      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-    }[c]));
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  function render(filterText){
-    const q = normalize(filterText || '');
-    const filtered = q ? songsIndexed.filter(s => s.norm.includes(q)) : songsIndexed;
-
-    countEl.textContent = filtered.length === songsIndexed.length
-      ? (songsIndexed.length + ' pieśni')
-      : ('Znaleziono: ' + filtered.length);
-
-    if(filtered.length === 0){
-      listContainer.innerHTML = '<div class="empty">Brak wyników dla podanej frazy.</div>';
-      return;
-    }
-
-    let html = '';
-    let lastLetter = null;
-    let ul = '';
-    filtered.forEach(s => {
-      const letter = s.title.charAt(0).toUpperCase();
-      if(letter !== lastLetter){
-        if(ul){ html += '<ul class="songs">' + ul + '</ul>'; ul = ''; }
-        html += '<div class="letter-header">' + letter + '</div>';
-        lastLetter = letter;
-      }
-      ul += '<li><button data-idx="' + s.idx + '">' + escapeHtml(s.title) + '<span class="chev">›</span></button></li>';
-    });
-    if(ul){ html += '<ul class="songs">' + ul + '</ul>'; }
-    listContainer.innerHTML = html;
+  // Helper: Normalizacja tekstu do wyszukiwania
+  function normalizeText(str){
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   }
 
-  // Heuristic: a line is a "chord line" if, once split on whitespace, every
-  // token looks like a chord symbol. Supports both major (uppercase root,
-  // e.g. G, C7, D/Fis) and Polish minor notation (lowercase root, e.g.
-  // a, h, fis, cis, gis, dis, ais - the h/is/es forms used for minor chords
-  // and sharps/flats in Polish chord charts), plus slash chords, sus/maj/
-  // min/dim/aug/add qualifiers and numeric extensions (7, 9, sus4...).
-  const CHORD_TOKEN = /^\(?(?:[A-H]|[a-h])(?:is|es|s)?(?:sus|maj|min|dim|aug|add|m)?[0-9]*[\+\-]?(?:\/(?:(?:[A-H]|[a-h])(?:is|es|s)?[0-9]*)?)?\)?$/;
+  // Weryfikacja czy linia zawiera akordy
   function isChordLine(line){
     const trimmed = line.trim();
     if(!trimmed) return false;
     const tokens = trimmed.split(/\s+/);
-    if(tokens.length === 0) return false;
-    let chordish = 0;
-    tokens.forEach(t => { if(CHORD_TOKEN.test(t)) chordish++; });
-    return chordish / tokens.length >= 0.8;
-  }
-  function isRefLine(line){
-    return /^\s*(Ref\.?|Refren|REFREN|Bridge|BRIDGE|Coda)\b/i.test(line);
-  }
-
-  // ---------- Overlay stack: keeps every full-screen view / sheet in sync
-  // with browser history so the hardware/software back button always closes
-  // exactly the thing currently on top, however deep the user navigated. ----------
-  const overlayStack = [];
-  function openOverlay(el){
-    console.log('[DEBUG] openOverlay() dla elementu id=', el.id, '- stan historii PRZED:', JSON.stringify(history.state));
-    el.classList.add('open');
-    overlayStack.push(el);
-    history.pushState({n: overlayStack.length}, '');
-    console.log('[DEBUG] openOverlay() zakończone - stan historii PO:', JSON.stringify(history.state), 'overlayStack.length=', overlayStack.length);
-  }
-  let dialogResolve = null;
-  let dialogPendingResult = null;
-  function closeTopOverlay(){
-    const elClosed = overlayStack.pop();
-    if(elClosed){
-      elClosed.classList.remove('open');
-      if(elClosed === customDialogBackdrop && dialogResolve){
-        const resolveFn = dialogResolve;
-        const result = dialogPendingResult;
-        dialogResolve = null;
-        dialogPendingResult = null;
-        resolveFn(result);
-      }
+    const chordRegex = /^[A-Ga-gHh](is|es)?(m|7|7\+|sus\d*|\d)*(\/[A-Ga-gHh](is|es)?)?$/i;
+    let matches = 0;
+    for(const token of tokens){
+      const cleanToken = token.replace(/[\(\)\[\]]/g, '');
+      if(!cleanToken) continue;
+      if(chordRegex.test(cleanToken)) matches++;
     }
+    return matches / tokens.length >= 0.6;
   }
-  window.addEventListener('popstate', (e) => {
-    console.log('[DEBUG] popstate - e.state=', JSON.stringify(e.state), 'overlayStack.length PRZED=', overlayStack.length);
-    const target = (e.state && e.state.n) || 0;
-    while(overlayStack.length > target){ closeTopOverlay(); }
-    console.log('[DEBUG] popstate zakończone - overlayStack.length PO=', overlayStack.length);
-  });
-  function goBack(){ console.log('[DEBUG] goBack() -> history.back()'); history.back(); }
 
-  // ---------- Custom dialog: replaces window.prompt/confirm/alert. Native
-  // dialogs are unreliable inside an installed/standalone PWA on many
-  // phones (can silently fail or freeze script execution), so every user
-  // interaction that used to rely on them now goes through this instead -
-  // it's a normal DOM overlay, fully integrated with the same back-button
-  // stack as every other screen. ----------
-  function showDialog(opts){
+  // Renderowanie tekstu pieśni z podświetleniem
+  function renderSongBody(bodyText){
+    const lines = bodyText.split('\n');
+    return lines.map(line => {
+      const trimmed = line.trim();
+      if(isChordLine(trimmed)){
+        return `<span class="chord-line">${escapeHtml(line)}</span>`;
+      } else if(/^(\[?\d+\]?|Ref\b|Refren\b|Bridge\b|Przejście\b|Wstęp\b)/i.test(trimmed)){
+        return `<span class="ref-line">${escapeHtml(line)}</span>`;
+      }
+      return escapeHtml(line);
+    }).join('\n');
+  }
+
+  // Moduł własnego dialogu
+  function customDialog({ message, input = false, defaultValue = '', okText = 'OK', cancelText = 'Anuluj', showCancel = true }){
     return new Promise((resolve) => {
-      dialogResolve = resolve;
-      dialogPendingResult = null;
-      customDialogMessage.textContent = opts.message || '';
-      if(opts.showInput){
-        customDialogInput.style.display = '';
-        customDialogInput.value = opts.defaultValue || '';
+      const backdrop = document.getElementById('customDialogBackdrop');
+      const msgEl = document.getElementById('customDialogMessage');
+      const inputEl = document.getElementById('customDialogInput');
+      const cancelBtn = document.getElementById('customDialogCancel');
+      const okBtn = document.getElementById('customDialogOk');
+
+      msgEl.textContent = message;
+      if(input){
+        inputEl.style.display = 'block';
+        inputEl.value = defaultValue;
       } else {
-        customDialogInput.style.display = 'none';
+        inputEl.style.display = 'none';
       }
-      customDialogCancel.style.display = opts.hideCancel ? 'none' : '';
-      openOverlay(customDialogBackdrop);
-      if(opts.showInput){
-        setTimeout(() => { customDialogInput.focus(); customDialogInput.select(); }, 50);
+      cancelBtn.style.display = showCancel ? 'inline-block' : 'none';
+      cancelBtn.textContent = cancelText;
+      okBtn.textContent = okText;
+
+      backdrop.classList.add('open');
+      if(input) setTimeout(() => inputEl.focus(), 100);
+
+      function cleanup(){
+        backdrop.classList.remove('open');
+        okBtn.removeEventListener('click', onOk);
+        cancelBtn.removeEventListener('click', onCancel);
       }
+      function onOk(){
+        cleanup();
+        resolve(input ? inputEl.value : true);
+      }
+      function onCancel(){
+        cleanup();
+        resolve(input ? null : false);
+      }
+      okBtn.addEventListener('click', onOk);
+      cancelBtn.addEventListener('click', onCancel);
     });
   }
-  function customPrompt(message, defaultValue){
-    return showDialog({ message, showInput: true, defaultValue });
-  }
-  function customConfirm(message){
-    return showDialog({ message, showInput: false }).then(r => r === true);
-  }
-  function customAlert(message){
-    return showDialog({ message, showInput: false, hideCancel: true });
-  }
-  customDialogOk.addEventListener('click', () => {
-    dialogPendingResult = (customDialogInput.style.display !== 'none') ? customDialogInput.value : true;
-    goBack();
-  });
-  customDialogCancel.addEventListener('click', () => {
-    dialogPendingResult = null;
-    goBack();
-  });
-  customDialogBackdrop.addEventListener('click', e => {
-    if(e.target === customDialogBackdrop){ dialogPendingResult = null; goBack(); }
-  });
-  customDialogInput.addEventListener('keydown', e => {
-    if(e.key === 'Enter'){ dialogPendingResult = customDialogInput.value; goBack(); }
-  });
 
-  // ---------- Song reading view ----------
-  let currentSongIdx = null;
-  function openSong(idx){
-    console.log('[DEBUG] openSong() wywołane z idx=', idx, 'typeof idx:', typeof idx);
-    currentSongIdx = idx;
-    const s = SONGS[idx];
-    console.log('[DEBUG] SONGS[idx] =', s ? s.title : 'UNDEFINED - to jest problem!');
-    if(!s){
-      console.log('[DEBUG] PRZERYWAM - brak pieśni pod tym indeksem w SONGS. Długość SONGS:', SONGS.length);
+  // Zarządzanie rozmiarem czcionki
+  let currentFontSize = parseInt(localStorage.getItem('spiewnik_font_size') || '15', 10);
+  const songBody = document.getElementById('song-body');
+  function applyFontSize(){
+    songBody.style.fontSize = currentFontSize + 'px';
+    localStorage.setItem('spiewnik_font_size', currentFontSize);
+  }
+  document.getElementById('fontMinus').addEventListener('click', () => {
+    if(currentFontSize > 10) { currentFontSize--; applyFontSize(); }
+  });
+  document.getElementById('fontPlus').addEventListener('click', () => {
+    if(currentFontSize < 30) { currentFontSize++; applyFontSize(); }
+  });
+  applyFontSize();
+
+  // Nawigacja zakładek
+  const tabSongs = document.getElementById('tabSongs');
+  const tabPlaylists = document.getElementById('tabPlaylists');
+  const songsPane = document.getElementById('songsPane');
+  const songsHeaderExtra = document.getElementById('songsHeaderExtra');
+  const playlistsPane = document.getElementById('playlistsPane');
+
+  function switchTab(tab){
+    if(tab === 'songs'){
+      tabSongs.classList.add('active');
+      tabPlaylists.classList.remove('active');
+      songsPane.style.display = 'block';
+      songsHeaderExtra.style.display = 'block';
+      playlistsPane.style.display = 'none';
+    } else {
+      tabSongs.classList.remove('active');
+      tabPlaylists.classList.add('active');
+      songsPane.style.display = 'none';
+      songsHeaderExtra.style.display = 'none';
+      playlistsPane.style.display = 'block';
+      renderPlaylists();
+    }
+  }
+  tabSongs.addEventListener('click', () => switchTab('songs'));
+  tabPlaylists.addEventListener('click', () => switchTab('playlists'));
+
+  // Lista pieśni i wyszukiwarka
+  const searchInput = document.getElementById('search');
+  const clearBtn = document.getElementById('clearBtn');
+  const listContainer = document.getElementById('listContainer');
+  const countEl = document.getElementById('count');
+
+  function renderSongList(){
+    const query = normalizeText(searchInput.value.trim());
+    clearBtn.style.display = searchInput.value ? 'block' : 'none';
+
+    const filtered = SONGS.filter(s => normalizeText(s.title).includes(query) || normalizeText(s.body).includes(query));
+    countEl.textContent = `Liczba pieśni: ${filtered.length}`;
+
+    if(filtered.length === 0){
+      listContainer.innerHTML = '<div class="empty">Brak wyników</div>';
       return;
     }
-    detailTitle.textContent = s.title;
-    const lines = s.body.split('\n');
-    const frag = document.createDocumentFragment();
-    songBody.innerHTML = '';
-    lines.forEach((line, i) => {
-      const span = document.createElement('span');
-      if(isChordLine(line)) span.className = 'chord-line';
-      else if(isRefLine(line)) span.className = 'ref-line';
-      span.textContent = line;
-      frag.appendChild(span);
-      if(i < lines.length - 1) frag.appendChild(document.createTextNode('\n'));
-    });
-    songBody.appendChild(frag);
-    document.getElementById('song-body-wrap').scrollTop = 0;
-    console.log('[DEBUG] wywołuję openOverlay(detailView)');
-    openOverlay(detailView);
-    console.log('[DEBUG] openOverlay zakończone, detailView ma klasę open:', detailView.classList.contains('open'));
+
+    filtered.sort((a,b) => a.title.localeCompare(b.title, 'pl'));
+
+    if(!query){
+      const groups = {};
+      filtered.forEach(s => {
+        const letter = s.title.charAt(0).toUpperCase();
+        if(!groups[letter]) groups[letter] = [];
+        groups[letter].push(s);
+      });
+
+      let html = '';
+      for(const letter of Object.keys(groups).sort((a,b) => a.localeCompare(b, 'pl'))){
+        html += `<div class="letter-header">${letter}</div><ul class="songs">`;
+        groups[letter].forEach(s => {
+          const songIdx = SONGS.indexOf(s);
+          html += `<li><button data-idx="${songIdx}"><span>${escapeHtml(s.title)}</span><span class="chev">›</span></button></li>`;
+        });
+        html += `</ul>`;
+      }
+      listContainer.innerHTML = html;
+    } else {
+      let html = '<ul class="songs">';
+      filtered.forEach(s => {
+        const songIdx = SONGS.indexOf(s);
+        html += `<li><button data-idx="${songIdx}"><span>${escapeHtml(s.title)}</span><span class="chev">›</span></button></li>`;
+      });
+      html += '</ul>';
+      listContainer.innerHTML = html;
+    }
   }
 
-  listContainer.addEventListener('click', e => {
-    const btn = e.target.closest('button[data-idx]');
-    if(btn) openSong(parseInt(btn.dataset.idx,10));
-  });
-
-  backBtn.addEventListener('click', goBack);
-
-  searchInput.addEventListener('input', () => {
-    clearBtn.style.display = searchInput.value ? 'block' : 'none';
-    render(searchInput.value);
-  });
+  searchInput.addEventListener('input', renderSongList);
   clearBtn.addEventListener('click', () => {
     searchInput.value = '';
-    clearBtn.style.display = 'none';
-    render('');
-    searchInput.focus();
+    renderSongList();
+  });
+  listContainer.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-idx]');
+    if(btn){
+      openSongDetail(parseInt(btn.dataset.idx, 10));
+    }
   });
 
-  let fontSize = parseInt(localStorage.getItem('spiewnik_fontsize') || '15', 10);
-  function applyFont(){
-    songBody.style.fontSize = fontSize + 'px';
-    localStorage.setItem('spiewnik_fontsize', String(fontSize));
+  // Widok szczegółowy pieśni
+  let currentSongIndex = null;
+  const detailView = document.getElementById('detail-view');
+  const detailTitle = document.getElementById('detailTitle');
+  const backBtn = document.getElementById('backBtn');
+
+  function openSongDetail(index){
+    currentSongIndex = index;
+    const song = SONGS[index];
+    detailTitle.textContent = song.title;
+    songBody.innerHTML = renderSongBody(song.body);
+    detailView.classList.add('open');
   }
-  fontMinus.addEventListener('click', () => { fontSize = Math.max(11, fontSize-1); applyFont(); });
-  fontPlus.addEventListener('click', () => { fontSize = Math.min(26, fontSize+1); applyFont(); });
-  applyFont();
 
-  // ---------- Tabs: Pieśni / Setlisty ----------
-  tabSongs.addEventListener('click', () => {
-    tabSongs.classList.add('active'); tabPlaylists.classList.remove('active');
-    songsPane.style.display = ''; playlistsPane.style.display = 'none';
-    songsHeaderExtra.style.display = '';
-  });
-  tabPlaylists.addEventListener('click', () => {
-    tabPlaylists.classList.add('active'); tabSongs.classList.remove('active');
-    playlistsPane.style.display = ''; songsPane.style.display = 'none';
-    songsHeaderExtra.style.display = 'none';
-    renderPlaylists();
+  backBtn.addEventListener('click', () => {
+    detailView.classList.remove('open');
   });
 
-  // ---------- Playlists (setlisty) data layer ----------
-  function loadPlaylists(){
+  // Zarządzanie setlistami
+  function getPlaylists(){
     try {
-      const raw = localStorage.getItem('spiewnik_playlists');
-      return raw ? JSON.parse(raw) : [];
-    } catch(e){ return []; }
+      return JSON.parse(localStorage.getItem('spiewnik_playlists') || '[]');
+    } catch(e){
+      return [];
+    }
   }
+
   function savePlaylists(list){
-    try { localStorage.setItem('spiewnik_playlists', JSON.stringify(list)); } catch(e){}
+    localStorage.setItem('spiewnik_playlists', JSON.stringify(list));
     pushToCloudIfConnected(list);
   }
-  function genId(){
-    return 'pl_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
-  }
-  function getPlaylist(id){
-    return loadPlaylists().find(p => p.id === id) || null;
-  }
-  function updatePlaylist(id, mutateFn){
-    const lists = loadPlaylists();
-    const pl = lists.find(p => p.id === id);
-    if(!pl) return;
-    mutateFn(pl);
-    savePlaylists(lists);
-  }
 
-  function renderPlaylists(){
-    const lists = loadPlaylists();
-    if(lists.length === 0){
-      playlistsContainer.innerHTML = '<div class="empty">Brak setlist. Utwórz pierwszą powyżej.</div>';
-      return;
-    }
-    let html = '<ul class="playlists">';
-    lists.forEach(pl => {
-      html += '<li>'
-        + '<button class="pl-open" data-id="' + pl.id + '">'
-        + '<span>' + escapeHtml(pl.name) + '</span>'
-        + '<span class="pl-count">' + pl.songs.length + ' pieśni</span>'
-        + '</button>'
-        + '<button class="pl-del" data-id="' + pl.id + '">✕</button>'
-        + '</li>';
-    });
-    html += '</ul>';
-    playlistsContainer.innerHTML = html;
-  }
+  const playlistsContainer = document.getElementById('playlistsContainer');
+  const newPlaylistBtn = document.getElementById('newPlaylistBtn');
+  const syncBtn = document.getElementById('syncBtn');
 
-  newPlaylistBtn.addEventListener('click', async () => {
-    const name = await customPrompt('Nazwa nowej setlisty:');
-    if(!name || !name.trim()) return;
-    const lists = loadPlaylists();
-    const pl = { id: genId(), name: name.trim(), songs: [] };
-    lists.push(pl);
-    savePlaylists(lists);
-    renderPlaylists();
-    openPlaylistDetail(pl.id);
-  });
-
-  // ---------- Sync UI ----------
-  function refreshSyncStatus(tempText){
+  function updateSyncBtnUI(){
     const code = getSyncCode();
-    if(tempText){
-      syncBtn.textContent = tempText;
-      syncBtn.classList.remove('active');
-      return;
-    }
     if(code){
-      syncBtn.textContent = '🔄 Synchronizacja: ' + code;
+      syncBtn.textContent = `🔄 Synchronizacja (Kod: ${code})`;
       syncBtn.classList.add('active');
     } else {
       syncBtn.textContent = '🔄 Synchronizacja wyłączona';
@@ -4584,271 +1399,364 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     }
   }
 
-  function onRemoteSyncUpdate(){
-    renderPlaylists();
-    if(playlistDetailView.classList.contains('open')){
-      renderPlaylistSongs();
-      renderPlaylistDetailHeader();
+  function renderPlaylists(){
+    updateSyncBtnUI();
+    const list = getPlaylists();
+    if(list.length === 0){
+      playlistsContainer.innerHTML = '<div class="empty">Brak utworzonych setlist</div>';
+      return;
     }
+
+    let html = '<ul class="playlists">';
+    list.forEach((pl) => {
+      const count = (pl.songs || []).length;
+      html += `
+        <li>
+          <button class="pl-open" data-pl-id="${pl.id}">
+            <strong>${escapeHtml(pl.title)}</strong>
+            <span class="pl-count">Pieśni: ${count}</span>
+          </button>
+          <button class="pl-del" data-del-id="${pl.id}" title="Usuń">🗑</button>
+        </li>
+      `;
+    });
+    html += '</ul>';
+    playlistsContainer.innerHTML = html;
   }
+
+  newPlaylistBtn.addEventListener('click', async () => {
+    const name = await customDialog({ message: 'Podaj nazwę nowej setlisty:', input: true, defaultValue: 'Nowa setlista' });
+    if(name && name.trim()){
+      const list = getPlaylists();
+      const newPl = { id: 'pl_' + Date.now(), title: name.trim(), songs: [] };
+      list.push(newPl);
+      savePlaylists(list);
+      renderPlaylists();
+      openPlaylistDetail(newPl.id);
+    }
+  });
 
   syncBtn.addEventListener('click', async () => {
-    const current = getSyncCode();
-    const input = await customPrompt(
-      'Podaj kod synchronizacji - ten sam kod wpisany na innym urządzeniu automatycznie połączy Wasze setlisty.\n\nZostaw puste pole i zatwierdź, aby wyłączyć synchronizację.',
-      current
-    );
-    if(input === null) return;
-    const trimmed = input.trim();
-    if(!trimmed){
-      disconnectSync();
-      refreshSyncStatus();
-      return;
-    }
-    refreshSyncStatus('🔄 Łączenie…');
-    try {
-      await connectSync(trimmed, onRemoteSyncUpdate);
-      refreshSyncStatus();
-      renderPlaylists();
-    } catch(e){
-      await customAlert('Nie udało się połączyć z synchronizacją. Sprawdź połączenie z internetem i spróbuj ponownie.');
-      refreshSyncStatus();
+    const currentCode = getSyncCode();
+    if(currentCode){
+      const disable = await customDialog({ message: `Aktualny kod synchronizacji: ${currentCode}\n\nCzy chcesz wyłączyć synchronizację?` });
+      if(disable){
+        disconnectSync();
+        updateSyncBtnUI();
+      }
+    } else {
+      const code = await customDialog({ message: 'Podaj wspólny kod synchronizacji (np. słowo lub PIN):', input: true });
+      if(code && code.trim()){
+        await connectSync(code.trim().toLowerCase(), (remoteList) => {
+          renderPlaylists();
+          if(activePlaylistId) renderPlaylistSongs(activePlaylistId);
+        });
+        updateSyncBtnUI();
+      }
     }
   });
 
-  refreshSyncStatus();
-  if(getSyncCode()){
-    connectSync(getSyncCode(), onRemoteSyncUpdate).then(() => {
-      refreshSyncStatus();
-      renderPlaylists();
-    }).catch(() => { refreshSyncStatus(); });
-  }
-
-  playlistsContainer.addEventListener('click', async e => {
-    const delBtn = e.target.closest('button.pl-del');
+  playlistsContainer.addEventListener('click', async (e) => {
+    const openBtn = e.target.closest('.pl-open');
+    if(openBtn){
+      openPlaylistDetail(openBtn.dataset.plId);
+      return;
+    }
+    const delBtn = e.target.closest('.pl-del');
     if(delBtn){
-      const id = delBtn.dataset.id;
-      const pl = getPlaylist(id);
-      if(pl && await customConfirm('Usunąć setlistę "' + pl.name + '"?')){
-        savePlaylists(loadPlaylists().filter(p => p.id !== id));
+      const confirmDel = await customDialog({ message: 'Czy na pewno chcesz usunąć tę setlistę?' });
+      if(confirmDel){
+        let list = getPlaylists();
+        list = list.filter(p => p.id !== delBtn.dataset.delId);
+        savePlaylists(list);
         renderPlaylists();
       }
-      return;
     }
-    const openBtn = e.target.closest('button.pl-open');
-    if(openBtn) openPlaylistDetail(openBtn.dataset.id);
   });
 
-  // ---------- Playlist detail (setlist contents, reorder, remove) ----------
-  let currentPlaylistId = null;
+  // Szczegóły konkretnej setlisty
+  let activePlaylistId = null;
+  const playlistDetailView = document.getElementById('playlist-detail-view');
+  const pldBackBtn = document.getElementById('pldBackBtn');
+  const pldTitleBtn = document.getElementById('pldTitleBtn');
+  const pldDeleteBtn = document.getElementById('pldDeleteBtn');
+  const playlistSongsContainer = document.getElementById('playlistSongsContainer');
+  const pldAddSongBtn = document.getElementById('pldAddSongBtn');
 
-  function openPlaylistDetail(id){
-    currentPlaylistId = id;
-    renderPlaylistDetailHeader();
-    renderPlaylistSongs();
-    openOverlay(playlistDetailView);
+  function openPlaylistDetail(plId){
+    activePlaylistId = plId;
+    const list = getPlaylists();
+    const pl = list.find(p => p.id === plId);
+    if(!pl) return;
+
+    pldTitleBtn.textContent = pl.title;
+    renderPlaylistSongs(plId);
+    playlistDetailView.classList.add('open');
   }
-  function renderPlaylistDetailHeader(){
-    const pl = getPlaylist(currentPlaylistId);
-    pldTitleBtn.textContent = pl ? pl.name : '';
-  }
-  function renderPlaylistSongs(){
-    const pl = getPlaylist(currentPlaylistId);
-    if(!pl){ playlistSongsContainer.innerHTML = ''; return; }
-    if(pl.songs.length === 0){
-      playlistSongsContainer.innerHTML = '<div class="pld-empty">Brak pieśni w tej setliście. Dodaj je przyciskiem poniżej.</div>';
+
+  function renderPlaylistSongs(plId){
+    const list = getPlaylists();
+    const pl = list.find(p => p.id === plId);
+    if(!pl) return;
+
+    if(!pl.songs || pl.songs.length === 0){
+      playlistSongsContainer.innerHTML = '<div class="pld-empty">Setlista jest pusta. Dodaj pieśni za pomocą przycisku poniżej.</div>';
       return;
     }
+
     let html = '<ul class="pld-songs">';
-    pl.songs.forEach((title, i) => {
-      const idx = titleToIdx[title];
-      const known = idx !== undefined;
-      html += '<li>'
-        + '<span class="pld-num">' + (i+1) + '.</span>'
-        + '<button class="pld-song-btn"' + (known ? ' data-idx="'+idx+'"' : ' disabled style="opacity:.4"') + '>' + escapeHtml(title) + '</button>'
-        + '<span class="pld-controls">'
-        + '<button class="pld-up" data-i="' + i + '"' + (i===0?' disabled':'') + '>↑</button>'
-        + '<button class="pld-down" data-i="' + i + '"' + (i===pl.songs.length-1?' disabled':'') + '>↓</button>'
-        + '<button class="pld-remove" data-i="' + i + '">✕</button>'
-        + '</span>'
-        + '</li>';
+    pl.songs.forEach((songTitle, idx) => {
+      const isFirst = idx === 0;
+      const isLast = idx === pl.songs.length - 1;
+      html += `
+        <li>
+          <span class="pld-num">${idx + 1}.</span>
+          <button class="pld-song-btn" data-title="${escapeHtml(songTitle)}">${escapeHtml(songTitle)}</button>
+          <div class="pld-controls">
+            <button data-move="up" data-idx="${idx}" ${isFirst ? 'disabled' : ''}>↑</button>
+            <button data-move="down" data-idx="${idx}" ${isLast ? 'disabled' : ''}>↓</button>
+            <button class="pld-remove" data-remove="${idx}">✕</button>
+          </div>
+        </li>
+      `;
     });
     html += '</ul>';
     playlistSongsContainer.innerHTML = html;
   }
 
-  playlistSongsContainer.addEventListener('click', e => {
-    console.log('[DEBUG] KLIKNIĘCIE w #playlistSongsContainer, e.target =', e.target.tagName, e.target.className);
-    const upBtn = e.target.closest('button.pld-up');
-    const downBtn = e.target.closest('button.pld-down');
-    const remBtn = e.target.closest('button.pld-remove');
-    const songBtn = e.target.closest('button.pld-song-btn');
-    console.log('[DEBUG] songBtn znaleziony?', !!songBtn, songBtn ? ('data-idx=' + songBtn.dataset.idx + ' disabled=' + songBtn.disabled) : '');
-    if(upBtn){
-      const i = parseInt(upBtn.dataset.i,10);
-      updatePlaylist(currentPlaylistId, pl => {
-        if(i>0){ const tmp = pl.songs[i-1]; pl.songs[i-1]=pl.songs[i]; pl.songs[i]=tmp; }
-      });
-      renderPlaylistSongs();
-      return;
-    }
-    if(downBtn){
-      const i = parseInt(downBtn.dataset.i,10);
-      updatePlaylist(currentPlaylistId, pl => {
-        if(i<pl.songs.length-1){ const tmp = pl.songs[i+1]; pl.songs[i+1]=pl.songs[i]; pl.songs[i]=tmp; }
-      });
-      renderPlaylistSongs();
-      return;
-    }
-    if(remBtn){
-      const i = parseInt(remBtn.dataset.i,10);
-      updatePlaylist(currentPlaylistId, pl => { pl.songs.splice(i,1); });
-      renderPlaylistSongs();
-      renderPlaylistDetailHeader();
-      return;
-    }
-    if(songBtn && songBtn.dataset.idx !== undefined){
-      console.log('[DEBUG] wywołuję openSong z data-idx =', songBtn.dataset.idx);
-      openSong(parseInt(songBtn.dataset.idx,10));
-    }
-  });
-
-  pldBackBtn.addEventListener('click', goBack);
-
-  pldTitleBtn.addEventListener('click', async () => {
-    const pl = getPlaylist(currentPlaylistId);
-    if(!pl) return;
-    const name = await customPrompt('Nowa nazwa setlisty:', pl.name);
-    if(!name || !name.trim()) return;
-    updatePlaylist(currentPlaylistId, p => { p.name = name.trim(); });
-    renderPlaylistDetailHeader();
+  pldBackBtn.addEventListener('click', () => {
+    playlistDetailView.classList.remove('open');
+    activePlaylistId = null;
     renderPlaylists();
   });
 
-  pldDeleteBtn.addEventListener('click', async () => {
-    const pl = getPlaylist(currentPlaylistId);
+  pldTitleBtn.addEventListener('click', async () => {
+    if(!activePlaylistId) return;
+    const list = getPlaylists();
+    const pl = list.find(p => p.id === activePlaylistId);
     if(!pl) return;
-    if(await customConfirm('Usunąć setlistę "' + pl.name + '"?')){
-      savePlaylists(loadPlaylists().filter(p => p.id !== currentPlaylistId));
+
+    const newTitle = await customDialog({ message: 'Zmień nazwę setlisty:', input: true, defaultValue: pl.title });
+    if(newTitle && newTitle.trim()){
+      pl.title = newTitle.trim();
+      savePlaylists(list);
+      pldTitleBtn.textContent = pl.title;
       renderPlaylists();
-      goBack();
     }
   });
 
-  pldAddSongBtn.addEventListener('click', () => {
-    openPicker();
+  pldDeleteBtn.addEventListener('click', async () => {
+    if(!activePlaylistId) return;
+    const confirmDel = await customDialog({ message: 'Czy na pewno chcesz usunąć tę setlistę?' });
+    if(confirmDel){
+      let list = getPlaylists();
+      list = list.filter(p => p.id !== activePlaylistId);
+      savePlaylists(list);
+      playlistDetailView.classList.remove('open');
+      activePlaylistId = null;
+      renderPlaylists();
+    }
   });
 
-  // ---------- Picker: search + toggle songs into the current setlist ----------
-  function renderPicker(filterText){
-    const pl = getPlaylist(currentPlaylistId);
-    if(!pl) return;
-    const q = normalize(filterText || '');
-    const filtered = q ? songsIndexed.filter(s => s.norm.includes(q)) : songsIndexed;
-    if(filtered.length === 0){
-      pickerListContainer.innerHTML = '<div class="empty">Brak wyników.</div>';
+  playlistSongsContainer.addEventListener('click', (e) => {
+    const songBtn = e.target.closest('.pld-song-btn');
+    if(songBtn){
+      const title = songBtn.dataset.title;
+      const songIdx = SONGS.findIndex(s => s.title === title);
+      if(songIdx !== -1) openSongDetail(songIdx);
       return;
     }
+
+    const moveBtn = e.target.closest('button[data-move]');
+    if(moveBtn){
+      const idx = parseInt(moveBtn.dataset.idx, 10);
+      const dir = moveBtn.dataset.move;
+      const list = getPlaylists();
+      const pl = list.find(p => p.id === activePlaylistId);
+      if(!pl) return;
+
+      const targetIdx = dir === 'up' ? idx - 1 : idx + 1;
+      if(targetIdx >= 0 && targetIdx < pl.songs.length){
+        const temp = pl.songs[idx];
+        pl.songs[idx] = pl.songs[targetIdx];
+        pl.songs[targetIdx] = temp;
+        savePlaylists(list);
+        renderPlaylistSongs(activePlaylistId);
+      }
+      return;
+    }
+
+    const removeBtn = e.target.closest('button[data-remove]');
+    if(removeBtn){
+      const idx = parseInt(removeBtn.dataset.remove, 10);
+      const list = getPlaylists();
+      const pl = list.find(p => p.id === activePlaylistId);
+      if(!pl) return;
+
+      pl.songs.splice(idx, 1);
+      savePlaylists(list);
+      renderPlaylistSongs(activePlaylistId);
+    }
+  });
+
+  // Picker pieśni do setlisty
+  const playlistPickerView = document.getElementById('playlist-picker-view');
+  const pickerBackBtn = document.getElementById('pickerBackBtn');
+  const pickerSearch = document.getElementById('pickerSearch');
+  const pickerClearBtn = document.getElementById('pickerClearBtn');
+  const pickerListContainer = document.getElementById('pickerListContainer');
+
+  pldAddSongBtn.addEventListener('click', () => {
+    renderPickerList();
+    playlistPickerView.classList.add('open');
+  });
+
+  pickerBackBtn.addEventListener('click', () => {
+    playlistPickerView.classList.remove('open');
+    renderPlaylistSongs(activePlaylistId);
+  });
+
+  function renderPickerList(){
+    const query = normalizeText(pickerSearch.value.trim());
+    pickerClearBtn.style.display = pickerSearch.value ? 'block' : 'none';
+
+    const list = getPlaylists();
+    const pl = list.find(p => p.id === activePlaylistId);
+    const currentSongs = new Set((pl && pl.songs) || []);
+
+    const sortedSongs = [...SONGS].sort((a,b) => a.title.localeCompare(b.title, 'pl'));
+    const filtered = sortedSongs.filter(s => normalizeText(s.title).includes(query));
+
     let html = '<ul class="picker-songs">';
     filtered.forEach(s => {
-      const inList = pl.songs.includes(s.title);
-      html += '<li><button data-title="' + escapeHtml(s.title) + '">'
-        + '<span class="picker-check' + (inList?' checked':'') + '">' + (inList?'✓':'') + '</span>'
-        + '<span>' + escapeHtml(s.title) + '</span>'
-        + '</button></li>';
+      const isChecked = currentSongs.has(s.title);
+      html += `
+        <li>
+          <button data-song-title="${escapeHtml(s.title)}">
+            <div class="picker-check ${isChecked ? 'checked' : ''}">${isChecked ? '✓' : ''}</div>
+            <span>${escapeHtml(s.title)}</span>
+          </button>
+        </li>
+      `;
     });
     html += '</ul>';
     pickerListContainer.innerHTML = html;
   }
 
-  function openPicker(){
-    pickerSearch.value = '';
-    pickerClearBtn.style.display = 'none';
-    renderPicker('');
-    openOverlay(playlistPickerView);
-  }
-
-  pickerListContainer.addEventListener('click', e => {
-    const btn = e.target.closest('button[data-title]');
-    if(!btn) return;
-    const title = btn.dataset.title;
-    updatePlaylist(currentPlaylistId, pl => {
-      const i = pl.songs.indexOf(title);
-      if(i === -1) pl.songs.push(title); else pl.songs.splice(i,1);
-    });
-    renderPicker(pickerSearch.value);
-    renderPlaylistSongs();
-    renderPlaylistDetailHeader();
-  });
-
-  pickerSearch.addEventListener('input', () => {
-    pickerClearBtn.style.display = pickerSearch.value ? 'block' : 'none';
-    renderPicker(pickerSearch.value);
-  });
+  pickerSearch.addEventListener('input', renderPickerList);
   pickerClearBtn.addEventListener('click', () => {
     pickerSearch.value = '';
-    pickerClearBtn.style.display = 'none';
-    renderPicker('');
-    pickerSearch.focus();
+    renderPickerList();
   });
-  pickerBackBtn.addEventListener('click', goBack);
 
-  // ---------- Quick "add current song to a setlist" sheet (from reading view) ----------
-  function renderQuickAdd(){
-    if(currentSongIdx === null) return;
-    const title = SONGS[currentSongIdx].title;
-    quickAddSongTitle.textContent = 'Dodaj „' + title + '" do:';
-    const lists = loadPlaylists();
-    if(lists.length === 0){
-      quickAddList.innerHTML = '<li style="padding:8px 4px; color:var(--muted); font-size:14px;">Nie masz jeszcze żadnej setlisty.</li>';
+  pickerListContainer.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-song-title]');
+    if(!btn) return;
+    const title = btn.dataset.songTitle;
+
+    const list = getPlaylists();
+    const pl = list.find(p => p.id === activePlaylistId);
+    if(!pl) return;
+
+    const idx = pl.songs.indexOf(title);
+    if(idx === -1){
+      pl.songs.push(title);
+    } else {
+      pl.songs.splice(idx, 1);
+    }
+    savePlaylists(list);
+    renderPickerList();
+  });
+
+  // Szybkie dodawanie do setlisty (z widoku podglądu pieśni)
+  const addToPlaylistBtn = document.getElementById('addToPlaylistBtn');
+  const quickAddBackdrop = document.getElementById('quickAddBackdrop');
+  const quickAddSongTitle = document.getElementById('quickAddSongTitle');
+  const quickAddList = document.getElementById('quickAddList');
+  const quickAddNewBtn = document.getElementById('quickAddNewBtn');
+
+  addToPlaylistBtn.addEventListener('click', () => {
+    if(currentSongIndex === null) return;
+    const song = SONGS[currentSongIndex];
+    quickAddSongTitle.textContent = song.title;
+    renderQuickAddList();
+    quickAddBackdrop.classList.add('open');
+  });
+
+  function renderQuickAddList(){
+    const song = SONGS[currentSongIndex];
+    const list = getPlaylists();
+
+    if(list.length === 0){
+      quickAddList.innerHTML = '<li style="padding:12px 4px; color:var(--muted); font-size:14px;">Brak utworzonych setlist.</li>';
       return;
     }
+
     let html = '';
-    lists.forEach(pl => {
-      const inList = pl.songs.includes(title);
-      html += '<li><button data-id="' + pl.id + '">'
-        + '<span class="picker-check' + (inList?' checked':'') + '">' + (inList?'✓':'') + '</span>'
-        + '<span>' + escapeHtml(pl.name) + '</span>'
-        + '</button></li>';
+    list.forEach(pl => {
+      const hasSong = (pl.songs || []).includes(song.title);
+      html += `
+        <li>
+          <button data-quick-pl-id="${pl.id}">
+            <span style="font-size:18px; color:var(--accent);">${hasSong ? '✓' : '+'}</span>
+            <span style="flex:1;">${escapeHtml(pl.title)}</span>
+          </button>
+        </li>
+      `;
     });
     quickAddList.innerHTML = html;
   }
-  function openQuickAdd(){
-    if(currentSongIdx === null) return;
-    renderQuickAdd();
-    openOverlay(quickAddBackdrop);
-  }
 
-  addToPlaylistBtn.addEventListener('click', openQuickAdd);
-  quickAddBackdrop.addEventListener('click', e => {
-    if(e.target === quickAddBackdrop) goBack();
+  quickAddBackdrop.addEventListener('click', (e) => {
+    if(e.target === quickAddBackdrop){
+      quickAddBackdrop.classList.remove('open');
+    }
   });
-  quickAddList.addEventListener('click', e => {
-    const btn = e.target.closest('button[data-id]');
-    if(!btn || currentSongIdx === null) return;
-    const title = SONGS[currentSongIdx].title;
-    updatePlaylist(btn.dataset.id, pl => {
-      const i = pl.songs.indexOf(title);
-      if(i === -1) pl.songs.push(title); else pl.songs.splice(i,1);
-    });
-    renderQuickAdd();
+
+  quickAddList.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-quick-pl-id]');
+    if(!btn) return;
+
+    const plId = btn.dataset.quickPlId;
+    const song = SONGS[currentSongIndex];
+    const list = getPlaylists();
+    const pl = list.find(p => p.id === plId);
+
+    if(pl){
+      const idx = pl.songs.indexOf(song.title);
+      if(idx === -1){
+        pl.songs.push(song.title);
+      } else {
+        pl.songs.splice(idx, 1);
+      }
+      savePlaylists(list);
+      renderQuickAddList();
+    }
   });
+
   quickAddNewBtn.addEventListener('click', async () => {
-    if(currentSongIdx === null) return;
-    const name = await customPrompt('Nazwa nowej setlisty:');
-    if(!name || !name.trim()) return;
-    const title = SONGS[currentSongIdx].title;
-    const lists = loadPlaylists();
-    lists.push({ id: genId(), name: name.trim(), songs: [title] });
-    savePlaylists(lists);
-    renderQuickAdd();
+    const song = SONGS[currentSongIndex];
+    const name = await customDialog({ message: 'Podaj nazwę nowej setlisty:', input: true, defaultValue: 'Nowa setlista' });
+    if(name && name.trim()){
+      const list = getPlaylists();
+      const newPl = { id: 'pl_' + Date.now(), title: name.trim(), songs: [song.title] };
+      list.push(newPl);
+      savePlaylists(list);
+      quickAddBackdrop.classList.remove('open');
+      customDialog({ message: `Dodano pieśń "${song.title}" do setlisty "${newPl.title}".`, showCancel: false });
+    }
   });
 
-  render('');
-
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+  // Inicjalizacja synchronizacji i renderowanie
+  const existingCode = getSyncCode();
+  if(existingCode){
+    connectSync(existingCode, (remote) => {
+      renderPlaylists();
+      if(activePlaylistId) renderPlaylistSongs(activePlaylistId);
+    });
   }
+
+  renderSongList();
 })();
 </script>
 </body>
