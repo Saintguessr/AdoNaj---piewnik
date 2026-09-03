@@ -111,7 +111,7 @@
 
   /* ---------- Detail view ---------- */
   #detail-view{
-    position:fixed; inset:0; background:var(--bg); display:none; flex-direction:column; z-index:10;
+    position:fixed; inset:0; background:var(--bg); display:none; flex-direction:column; z-index:15;
   }
   #detail-view.open{display:flex;}
   .detail-header{
@@ -396,26 +396,21 @@
   // ---------- Main app ----------
 (function(){
   const SONGS = [
-  { title: "Adorujmy Najwyższego - AdoNaj",
-    body: `C G a F
-C G C
+{ title: "Adorujmy Najwyższego - AdoNaj",
+    body: `a F G C
+Adorujmy Najwyższego
+F G C G F
+Boga Ojca Stworzyciela wszystkiego
+a F G C
+Adorujmy Najwyższego
+F G C G F
+Jego Syna Zbawiciela naszego
+a G C   F G C
+Adorujmy Najwyższego
+F G C 
+Ducha Ognia Parakleta, Świętego
 
-C a
-Adorujmy Najwyższego
-F G C
-Boga Stwórcę świata wspaniałego
-C a
-Adorujmy Najwyższego
-F G C
-Jego Syna Zbawcę Jedynego
-C a
-Adorujmy Najwyższego
-F G C
-Ducha Ognia Obrońcę naszego
-C a
-Adorujmy Najwyższego
-F G C
-Świętą Trójcę Boga Wszechmocnego
+
 ` },
   { title: "Albowiem tak Bóg umiłował świat",
     body: `e        D          C     h         e
@@ -728,6 +723,192 @@ E               H         cis       A
 Błogosławieni miłosierni,
 E               H          Fis
 albowiem oni miłosierdzia dostąpią!` },
+  { title: "Błogosławieństwo",
+    body: `H                  E/H          H/Dis
+Niech Pan Cię strzeże i błogosławi 
+                       Fissus4               gis
+Rozjaśni oblicze nad tobą w miłosierdziu swym 
+                  E/H     H/Dis
+Niech twarz obróci ku tobie
+     Fissus4       H
+I pokój swój da
+
+H                  E/H          H/Dis
+Niech Pan Cię strzeże i błogosławi 
+                       Fissus4               gis
+Rozjaśni oblicze nad tobą w miłosierdziu swym 
+                  E/H     H/Dis
+Niech twarz obróci ku tobie
+     Fissus4       H
+I pokój swój da
+
+gis      E
+A - a - amen
+H   Fis
+A - amen
+gis      E
+A - a - amen
+H   Fis
+A - amen
+
+H                  E/H          H/Dis
+Niech Pan Cię strzeże i błogosławi 
+                       Fissus4               gis
+Rozjaśni oblicze nad tobą w miłosierdziu swym 
+                  E/H     H/Dis
+Niech twarz obróci ku tobie
+     Fissus4       H
+I pokój swój da
+
+gis      E
+A - a - amen
+H   Fis
+A - amen
+gis      E
+A - a - amen
+H   Fis
+A - amen
+gis      E
+A - a - amen
+H   Fis
+A - amen
+gis      E
+A - a - amen
+H   Fis
+A - amen
+
+       gis
+Niechaj Bóg cię błogosławi
+   E
+Po tysięczne pokolenie
+    H
+Twą rodzinę i twe dzieci
+       Fis/Ais
+Twoje wnuki i ich dzieci
+
+       gis
+Niechaj Bóg cię błogosławi
+   E
+Po tysięczne pokolenie
+    H
+Twą rodzinę i twe dzieci
+       Fis/Ais
+Twoje wnuki i ich dzieci
+
+       gis
+Niechaj Bóg cię błogosławi
+   E
+Po tysięczne pokolenie
+    H
+Twą rodzinę i twe dzieci
+       Fis/Ais
+Twoje wnuki i ich dzieci
+
+       gis
+Niechaj Bóg cię błogosławi
+   E
+Po tysięczne pokolenie
+    H
+Twą rodzinę i twe dzieci
+       Fis/Ais
+Twoje wnuki i ich dzieci
+
+       gis
+Niech obecność Jego Ducha
+     E
+Cię otacza i prowadzi
+    H
+Będzie w tobie i przy tobie
+        Fis/Ais
+On jest z tobą
+        Fis
+On jest z tobą
+
+    gis
+O poranku i wieczorem
+        E
+W twoim przyjściu, w twoim wyjściu
+        H
+W twoim płaczu i radości
+        Fis/Ais
+On jest z tobą
+      Fis
+I dla ciebie
+
+        gis                E
+On jest z tobą i dla ciebie
+        H                  Fis
+On jest z tobą i dla ciebie
+        gis                E
+On jest z tobą i dla ciebie
+        H                  Fis
+On jest z tobą
+
+gis      E
+A - a - amen
+H   Fis
+A - amen
+gis      E
+A - a - amen
+H   Fis
+A - amen
+gis      E
+A - a - amen
+H   Fis
+A - amen
+gis      E
+A - a - amen
+H   Fis
+A - amen
+
+       gis
+Niechaj Bóg cię błogosławi
+   E
+Po tysięczne pokolenie
+    H
+Twą rodzinę i twe dzieci
+       Fis/Ais
+Twoje wnuki i ich dzieci
+
+       gis
+Niech obecność Jego Ducha
+     E
+Cię otacza i prowadzi
+    H
+Będzie w tobie i przy tobie
+        Fis/Ais
+On jest z tobą
+        Fis
+On jest z tobą
+
+    gis
+O poranku i wieczorem
+        E
+W twoim przyjściu, w twoim wyjściu
+        H
+W twoim płaczu i radości
+        Fis/Ais
+On jest z tobą
+      Fis
+I dla ciebie
+
+        gis                E
+On jest z tobą i dla ciebie
+        H                  Fis
+On jest z tobą i dla ciebie
+        gis                E
+On jest z tobą i dla ciebie
+        H                  Fis
+On jest z tobą
+
+gis      E
+A - a - amen
+H   Fis
+A - amen
+gis      E
+A - a - amen
+H   Fis
+A - amen` },
   { title: "Bóg nad swym ludem zmiłował się",
     body: `1.
 e          a         H       e
@@ -1749,7 +1930,8 @@ C
 Życiodajny spłynie deszcz na spragnione serce,
 a h
 Obmyj mnie i uświęć mnie;
-Uwielbienia niech popłynie pieśń!  x2				e CH7
+e C H7
+Uwielbienia niech popłynie pieśń!  x2				
 C G
 Chwała Jezusowi, który za mnie życie dał!
 C G
@@ -1863,6 +2045,15 @@ F C d
 Wiedz, że robię to, bo Jestem
 B C
 Twym najlepszym przyjacielem!` },
+  { title: "O Zbawcza Hostio",
+    body: `O Zbawcza Hostio godna czci
+Co lud do niebios wiedziesz bram
+Znój srogi nęka wiernych Ci
+Daj siłę pomoc ześlij nam
+Jednemu w Trójcy Władcy ziem
+Niech będzie chwała w każdy czas
+Niech on wieczystym życiem swym
+W ojczyźnie rajskiej darzy nas. Amen` },
   { title: "Oceany - Hillsong UNITED",
     body: `h fis D
 Znad oceanów do mnie wołasz
@@ -2438,6 +2629,22 @@ D A fis cis D
 Dzięki Ci Boże mój za ten krzyż, który Jezus
 A fis cis
 cierpiał za mnie, Jezus cierpiał za mnie.` },
+  { title: "Przed tak Wielkim Sakramentem",
+    body: `Przed tak Wielkim Sakramentem
+Upadajmy wszyscy wraz,
+Niech przed Nowym Testamentem
+Starych praw ustąpi czas.
+Co dla zmysłów niepojęte,
+Niech dopełni wiara w nas.
+
+Bogu Ojcu i Synowi
+Hołd po wszystkie nieśmy dni.
+Niech podaje wiek wiekowi
+Hymn triumfu, dzięki, czci.
+A równemu im Duchowi
+Niechaj wieczna chwała brzmi.
+Amen.
+` },
   { title: "Przenikasz mnie - Guadalupe",
     body: `a C
 1. Przenikasz i znasz mnie Panie,
@@ -2448,8 +2655,9 @@ Przenikasz i znasz mnie Panie,
 F C G
 moje łzy i poświęcenie.
 
+Ref.
 F d
-Ref. Tylko w Tobie prawda jest,
+ Tylko w Tobie prawda jest,
 a G
 nie co mówią, nie co myślą.
 F d
@@ -2472,14 +2680,46 @@ tak cenna jest w Twoich oczach.
 Znasz moje uczucia i pragnienia, /
 nie tajne Ci moje roztargnienia.
 
-Ref. Tylko w Tobie prawda jest…
+Ref.
+F d
+ Tylko w Tobie prawda jest,
+a G
+nie co mówią, nie co myślą.
+F d
+Tylko Ty mnie Panie znasz,
+a G
+do głębi przenikasz mnie.
+F d
+Tylko w Tobie prawda jest,
+a G
+nie co mówię, nie co myślę.
+F d
+Tylko Ty mnie Panie znasz,
+a G
+w pełni.
 
 instrumental F C d a F C G a
 
 F G
 Bridge: Wszystko co mam to Ty
 
-Ref. Tylko w Tobie prawda jest…` },
+Ref.
+F d
+ Tylko w Tobie prawda jest,
+a G
+nie co mówią, nie co myślą.
+F d
+Tylko Ty mnie Panie znasz,
+a G
+do głębi przenikasz mnie.
+F d
+Tylko w Tobie prawda jest,
+a G
+nie co mówię, nie co myślę.
+F d
+Tylko Ty mnie Panie znasz,
+a G
+w pełni.` },
   { title: "Przybądź Święty Niepojęty",
     body: `1.
 A            C               D             A
@@ -3624,6 +3864,11 @@ Alleluja, alleluja
 OUTRO
 F Es B b
 (Alleluja)` },
+  { title: "Wielbię Ciebie",
+    body: `Wielbię Ciebie w każdym momencie,
+O żywy chlebie nasz w tym sakramencie,
+O żywy chlebie nasz w tym sakramencie.
+` },
   { title: "Wierzę w Ciebie Panie",
     body: `1.
 d B C a
@@ -3947,6 +4192,7 @@ e D G a H7
 Już nie będę się bał – cóż może zrobić mi śmierć?
 e D G a H7
 Nie, nie lękam się i śpiewam chwały pieśń.` }
+
 ];
 
   const listContainer = document.getElementById('listContainer');
