@@ -4364,9 +4364,11 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
   // exactly the thing currently on top, however deep the user navigated. ----------
   const overlayStack = [];
   function openOverlay(el){
+    console.log('[DEBUG] openOverlay() dla elementu id=', el.id, '- stan historii PRZED:', JSON.stringify(history.state));
     el.classList.add('open');
     overlayStack.push(el);
     history.pushState({n: overlayStack.length}, '');
+    console.log('[DEBUG] openOverlay() zakończone - stan historii PO:', JSON.stringify(history.state), 'overlayStack.length=', overlayStack.length);
   }
   let dialogResolve = null;
   let dialogPendingResult = null;
@@ -4384,10 +4386,12 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     }
   }
   window.addEventListener('popstate', (e) => {
+    console.log('[DEBUG] popstate - e.state=', JSON.stringify(e.state), 'overlayStack.length PRZED=', overlayStack.length);
     const target = (e.state && e.state.n) || 0;
     while(overlayStack.length > target){ closeTopOverlay(); }
+    console.log('[DEBUG] popstate zakończone - overlayStack.length PO=', overlayStack.length);
   });
-  function goBack(){ history.back(); }
+  function goBack(){ console.log('[DEBUG] goBack() -> history.back()'); history.back(); }
 
   // ---------- Custom dialog: replaces window.prompt/confirm/alert. Native
   // dialogs are unreliable inside an installed/standalone PWA on many
@@ -4440,8 +4444,14 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
   // ---------- Song reading view ----------
   let currentSongIdx = null;
   function openSong(idx){
+    console.log('[DEBUG] openSong() wywołane z idx=', idx, 'typeof idx:', typeof idx);
     currentSongIdx = idx;
     const s = SONGS[idx];
+    console.log('[DEBUG] SONGS[idx] =', s ? s.title : 'UNDEFINED - to jest problem!');
+    if(!s){
+      console.log('[DEBUG] PRZERYWAM - brak pieśni pod tym indeksem w SONGS. Długość SONGS:', SONGS.length);
+      return;
+    }
     detailTitle.textContent = s.title;
     const lines = s.body.split('\n');
     const frag = document.createDocumentFragment();
@@ -4456,7 +4466,9 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     });
     songBody.appendChild(frag);
     document.getElementById('song-body-wrap').scrollTop = 0;
+    console.log('[DEBUG] wywołuję openOverlay(detailView)');
     openOverlay(detailView);
+    console.log('[DEBUG] openOverlay zakończone, detailView ma klasę open:', detailView.classList.contains('open'));
   }
 
   listContainer.addEventListener('click', e => {
@@ -4666,10 +4678,12 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
   }
 
   playlistSongsContainer.addEventListener('click', e => {
+    console.log('[DEBUG] KLIKNIĘCIE w #playlistSongsContainer, e.target =', e.target.tagName, e.target.className);
     const upBtn = e.target.closest('button.pld-up');
     const downBtn = e.target.closest('button.pld-down');
     const remBtn = e.target.closest('button.pld-remove');
     const songBtn = e.target.closest('button.pld-song-btn');
+    console.log('[DEBUG] songBtn znaleziony?', !!songBtn, songBtn ? ('data-idx=' + songBtn.dataset.idx + ' disabled=' + songBtn.disabled) : '');
     if(upBtn){
       const i = parseInt(upBtn.dataset.i,10);
       updatePlaylist(currentPlaylistId, pl => {
@@ -4694,6 +4708,7 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
       return;
     }
     if(songBtn && songBtn.dataset.idx !== undefined){
+      console.log('[DEBUG] wywołuję openSong z data-idx =', songBtn.dataset.idx);
       openSong(parseInt(songBtn.dataset.idx,10));
     }
   });
