@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spiewnik-cache-v2';
+const CACHE_NAME = 'spiewnik-cache-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -24,20 +24,32 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Network-first: always fetch the freshest version when online (this is
-// what index.html itself needs, since ALL app logic and song data lives
-// there - a cache-first strategy previously meant new deploys could go
-// completely unnoticed by already-installed devices). Falls back to the
-// last cached copy only when the network request actually fails
-// (genuinely offline use).
+// Network-first for our OWN app files only (falls back to the cached copy
+// when actually offline). Every other request - anything cross-origin
+// (Firebase Auth, Firestore's realtime channel, etc.) or non-GET - is left
+// completely untouched and passed straight through to the network as if
+// this service worker didn't exist. Two concrete reasons this matters:
+//   1) The Cache API only supports GET requests; Firestore's realtime
+//      "Listen" channel and Firebase Auth calls use POST, so trying to
+//      cache.put() them throws and corrupts that request/response cycle.
+//   2) Firebase's long-lived streaming connection cannot be meaningfully
+//      proxied through a service worker fetch handler at all - intercepting
+//      it breaks the realtime sync connection outright, which then retries
+//      in a loop and can make the whole page feel sluggish/unresponsive.
 self.addEventListener('fetch', event => {
+  const req = event.request;
+  let sameOrigin = false;
+  try { sameOrigin = new URL(req.url).origin === self.location.origin; } catch (e) {}
+  if (req.method !== 'GET' || !sameOrigin) {
+    return; // do not call respondWith - let the browser handle it normally
+  }
   event.respondWith(
-    fetch(event.request)
+    fetch(req)
       .then(resp => {
         const respClone = resp.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, respClone));
+        caches.open(CACHE_NAME).then(cache => cache.put(req, respClone));
         return resp;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() => caches.match(req))
   );
 });
