@@ -111,7 +111,7 @@
 
   /* ---------- Detail view ---------- */
   #detail-view{
-    position:fixed; inset:0; background:var(--bg); display:none; flex-direction:column; z-index:15;
+    position:fixed; inset:0; background:var(--bg); display:none; flex-direction:column; z-index:10;
   }
   #detail-view.open{display:flex;}
   .detail-header{
@@ -231,54 +231,9 @@
     padding:10px 14px; border-radius:10px; border:1px dashed var(--accent);
     background:none; color:var(--accent); font-size:14px; font-weight:700; cursor:pointer; width:100%;
   }
-
-  /* ---------- Custom dialog (replaces native prompt/confirm/alert, which
-     are unreliable inside an installed/standalone PWA on many phones) ---------- */
-  #customDialogBackdrop{
-    position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; z-index:30;
-    align-items:center; justify-content:center; padding:20px;
-  }
-  #customDialogBackdrop.open{display:flex;}
-  #customDialogSheet{
-    width:100%; max-width:360px; background:var(--bg2); border-radius:16px;
-    border:1px solid var(--border); padding:20px;
-  }
-  #customDialogMessage{
-    margin:0 0 14px; font-size:15px; color:var(--text); line-height:1.4; white-space:pre-line;
-  }
-  #customDialogInput{
-    width:100%; padding:11px 12px; border-radius:10px; border:1px solid var(--border);
-    background:var(--card2); color:var(--text); font-size:16px; outline:none; margin-bottom:16px; box-sizing:border-box;
-  }
-  #customDialogInput:focus{border-color:var(--accent);}
-  .dialog-buttons{display:flex; gap:10px; justify-content:flex-end;}
-  .dialog-buttons button{
-    padding:10px 18px; border-radius:10px; border:1px solid var(--border);
-    background:var(--card2); color:var(--text); font-size:14px; font-weight:700; cursor:pointer;
-  }
-  #customDialogOk{background:var(--accent); color:#1e1b0a; border-color:var(--accent);}
 </style>
 </head>
 <body>
-<div id="debugErrorBanner" style="display:none; position:fixed; top:0; left:0; right:0; z-index:99999; background:#dc2626; color:#fff; padding:10px 14px; font-family:monospace; font-size:12px; white-space:pre-wrap; max-height:45vh; overflow:auto; box-sizing:border-box;"></div>
-<script>
-(function(){
-  var banner = document.getElementById('debugErrorBanner');
-  function show(msg){
-    banner.style.display = 'block';
-    banner.textContent += (banner.textContent ? '\n\n---\n\n' : '') + msg;
-  }
-  window.addEventListener('error', function(e){
-    show('BŁĄD JS: ' + e.message + '\nplik: ' + (e.filename||'?') + ' linia:' + (e.lineno||'?') + ' kol:' + (e.colno||'?'));
-  });
-  window.addEventListener('unhandledrejection', function(e){
-    var r = e.reason;
-    var msg = (r && r.message) ? r.message : String(r);
-    show('NIEOBSŁUŻONY BŁĄD (Promise): ' + msg);
-  });
-  window.__spiewnikDebugShow = show;
-})();
-</script>
 <div id="app">
 
   <div id="list-view">
@@ -357,17 +312,6 @@
       <ul class="quick-pl-list" id="quickAddList"></ul>
       <div class="quick-new-row">
         <button id="quickAddNewBtn">+ Nowa setlista z tą pieśnią</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="customDialogBackdrop">
-    <div id="customDialogSheet">
-      <p id="customDialogMessage"></p>
-      <input id="customDialogInput" type="text" autocomplete="off">
-      <div class="dialog-buttons">
-        <button id="customDialogCancel">Anuluj</button>
-        <button id="customDialogOk">OK</button>
       </div>
     </div>
   </div>
@@ -453,19 +397,25 @@
 (function(){
   const SONGS = [
   { title: "Adorujmy Najwyższego - AdoNaj",
-    body: `a E
-Adorujmy Najwyższego
-F G C
-Boga Ojca, Stworzyciela wszystkiego
-a E
-Adorujmy Najwyższego
-F G C
-Jego Syna Zbawiciela naszego
-a E
-Adorujmy Najwyższego
-F G E a
-Ducha Ognia, Parakleta, Świętego
+    body: `C G a F
+C G C
 
+C a
+Adorujmy Najwyższego
+F G C
+Boga Stwórcę świata wspaniałego
+C a
+Adorujmy Najwyższego
+F G C
+Jego Syna Zbawcę Jedynego
+C a
+Adorujmy Najwyższego
+F G C
+Ducha Ognia Obrońcę naszego
+C a
+Adorujmy Najwyższego
+F G C
+Świętą Trójcę Boga Wszechmocnego
 ` },
   { title: "Albowiem tak Bóg umiłował świat",
     body: `e        D          C     h         e
@@ -778,192 +728,6 @@ E               H         cis       A
 Błogosławieni miłosierni,
 E               H          Fis
 albowiem oni miłosierdzia dostąpią!` },
-  { title: "Błogosławieństwo",
-    body: `H                  E/H          H/Dis
-Niech Pan Cię strzeże i błogosławi 
-                       Fissus4               gis
-Rozjaśni oblicze nad tobą w miłosierdziu swym 
-                  E/H     H/Dis
-Niech twarz obróci ku tobie
-     Fissus4       H
-I pokój swój da
-
-H                  E/H          H/Dis
-Niech Pan Cię strzeże i błogosławi 
-                       Fissus4               gis
-Rozjaśni oblicze nad tobą w miłosierdziu swym 
-                  E/H     H/Dis
-Niech twarz obróci ku tobie
-     Fissus4       H
-I pokój swój da
-
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-
-H                  E/H          H/Dis
-Niech Pan Cię strzeże i błogosławi 
-                       Fissus4               gis
-Rozjaśni oblicze nad tobą w miłosierdziu swym 
-                  E/H     H/Dis
-Niech twarz obróci ku tobie
-     Fissus4       H
-I pokój swój da
-
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-
-       gis
-Niechaj Bóg cię błogosławi
-   E
-Po tysięczne pokolenie
-    H
-Twą rodzinę i twe dzieci
-       Fis/Ais
-Twoje wnuki i ich dzieci
-
-       gis
-Niechaj Bóg cię błogosławi
-   E
-Po tysięczne pokolenie
-    H
-Twą rodzinę i twe dzieci
-       Fis/Ais
-Twoje wnuki i ich dzieci
-
-       gis
-Niechaj Bóg cię błogosławi
-   E
-Po tysięczne pokolenie
-    H
-Twą rodzinę i twe dzieci
-       Fis/Ais
-Twoje wnuki i ich dzieci
-
-       gis
-Niechaj Bóg cię błogosławi
-   E
-Po tysięczne pokolenie
-    H
-Twą rodzinę i twe dzieci
-       Fis/Ais
-Twoje wnuki i ich dzieci
-
-       gis
-Niech obecność Jego Ducha
-     E
-Cię otacza i prowadzi
-    H
-Będzie w tobie i przy tobie
-        Fis/Ais
-On jest z tobą
-        Fis
-On jest z tobą
-
-    gis
-O poranku i wieczorem
-        E
-W twoim przyjściu, w twoim wyjściu
-        H
-W twoim płaczu i radości
-        Fis/Ais
-On jest z tobą
-      Fis
-I dla ciebie
-
-        gis                E
-On jest z tobą i dla ciebie
-        H                  Fis
-On jest z tobą i dla ciebie
-        gis                E
-On jest z tobą i dla ciebie
-        H                  Fis
-On jest z tobą
-
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-
-       gis
-Niechaj Bóg cię błogosławi
-   E
-Po tysięczne pokolenie
-    H
-Twą rodzinę i twe dzieci
-       Fis/Ais
-Twoje wnuki i ich dzieci
-
-       gis
-Niech obecność Jego Ducha
-     E
-Cię otacza i prowadzi
-    H
-Będzie w tobie i przy tobie
-        Fis/Ais
-On jest z tobą
-        Fis
-On jest z tobą
-
-    gis
-O poranku i wieczorem
-        E
-W twoim przyjściu, w twoim wyjściu
-        H
-W twoim płaczu i radości
-        Fis/Ais
-On jest z tobą
-      Fis
-I dla ciebie
-
-        gis                E
-On jest z tobą i dla ciebie
-        H                  Fis
-On jest z tobą i dla ciebie
-        gis                E
-On jest z tobą i dla ciebie
-        H                  Fis
-On jest z tobą
-
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen` },
   { title: "Bóg nad swym ludem zmiłował się",
     body: `1.
 e          a         H       e
@@ -1985,8 +1749,7 @@ C
 Życiodajny spłynie deszcz na spragnione serce,
 a h
 Obmyj mnie i uświęć mnie;
-e C H7
-Uwielbienia niech popłynie pieśń!  x2				
+Uwielbienia niech popłynie pieśń!  x2				e CH7
 C G
 Chwała Jezusowi, który za mnie życie dał!
 C G
@@ -2100,15 +1863,6 @@ F C d
 Wiedz, że robię to, bo Jestem
 B C
 Twym najlepszym przyjacielem!` },
-  { title: "O Zbawcza Hostio",
-    body: `O Zbawcza Hostio godna czci
-Co lud do niebios wiedziesz bram
-Znój srogi nęka wiernych Ci
-Daj siłę pomoc ześlij nam
-Jednemu w Trójcy Władcy ziem
-Niech będzie chwała w każdy czas
-Niech on wieczystym życiem swym
-W ojczyźnie rajskiej darzy nas. Amen` },
   { title: "Oceany - Hillsong UNITED",
     body: `h fis D
 Znad oceanów do mnie wołasz
@@ -2684,22 +2438,6 @@ D A fis cis D
 Dzięki Ci Boże mój za ten krzyż, który Jezus
 A fis cis
 cierpiał za mnie, Jezus cierpiał za mnie.` },
-  { title: "Przed tak Wielkim Sakramentem",
-    body: `Przed tak Wielkim Sakramentem
-Upadajmy wszyscy wraz,
-Niech przed Nowym Testamentem
-Starych praw ustąpi czas.
-Co dla zmysłów niepojęte,
-Niech dopełni wiara w nas.
-
-Bogu Ojcu i Synowi
-Hołd po wszystkie nieśmy dni.
-Niech podaje wiek wiekowi
-Hymn triumfu, dzięki, czci.
-A równemu im Duchowi
-Niechaj wieczna chwała brzmi.
-Amen.
-` },
   { title: "Przenikasz mnie - Guadalupe",
     body: `a C
 1. Przenikasz i znasz mnie Panie,
@@ -2710,9 +2448,8 @@ Przenikasz i znasz mnie Panie,
 F C G
 moje łzy i poświęcenie.
 
-Ref.
 F d
- Tylko w Tobie prawda jest,
+Ref. Tylko w Tobie prawda jest,
 a G
 nie co mówią, nie co myślą.
 F d
@@ -2735,46 +2472,14 @@ tak cenna jest w Twoich oczach.
 Znasz moje uczucia i pragnienia, /
 nie tajne Ci moje roztargnienia.
 
-Ref.
-F d
- Tylko w Tobie prawda jest,
-a G
-nie co mówią, nie co myślą.
-F d
-Tylko Ty mnie Panie znasz,
-a G
-do głębi przenikasz mnie.
-F d
-Tylko w Tobie prawda jest,
-a G
-nie co mówię, nie co myślę.
-F d
-Tylko Ty mnie Panie znasz,
-a G
-w pełni.
+Ref. Tylko w Tobie prawda jest…
 
 instrumental F C d a F C G a
 
 F G
 Bridge: Wszystko co mam to Ty
 
-Ref.
-F d
- Tylko w Tobie prawda jest,
-a G
-nie co mówią, nie co myślą.
-F d
-Tylko Ty mnie Panie znasz,
-a G
-do głębi przenikasz mnie.
-F d
-Tylko w Tobie prawda jest,
-a G
-nie co mówię, nie co myślę.
-F d
-Tylko Ty mnie Panie znasz,
-a G
-w pełni.` },
+Ref. Tylko w Tobie prawda jest…` },
   { title: "Przybądź Święty Niepojęty",
     body: `1.
 A            C               D             A
@@ -3919,11 +3624,6 @@ Alleluja, alleluja
 OUTRO
 F Es B b
 (Alleluja)` },
-  { title: "Wielbię Ciebie",
-    body: `Wielbię Ciebie w każdym momencie,
-O żywy chlebie nasz w tym sakramencie,
-O żywy chlebie nasz w tym sakramencie.
-` },
   { title: "Wierzę w Ciebie Panie",
     body: `1.
 d B C a
@@ -4288,12 +3988,6 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
   const quickAddList = document.getElementById('quickAddList');
   const quickAddNewBtn = document.getElementById('quickAddNewBtn');
 
-  const customDialogBackdrop = document.getElementById('customDialogBackdrop');
-  const customDialogMessage = document.getElementById('customDialogMessage');
-  const customDialogInput = document.getElementById('customDialogInput');
-  const customDialogCancel = document.getElementById('customDialogCancel');
-  const customDialogOk = document.getElementById('customDialogOk');
-
   function normalize(s){
     return s.toLowerCase()
       .replace(/ą/g,'a').replace(/ć/g,'c').replace(/ę/g,'e').replace(/ł/g,'l')
@@ -4368,74 +4062,15 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     overlayStack.push(el);
     history.pushState({n: overlayStack.length}, '');
   }
-  let dialogResolve = null;
-  let dialogPendingResult = null;
   function closeTopOverlay(){
-    const elClosed = overlayStack.pop();
-    if(elClosed){
-      elClosed.classList.remove('open');
-      if(elClosed === customDialogBackdrop && dialogResolve){
-        const resolveFn = dialogResolve;
-        const result = dialogPendingResult;
-        dialogResolve = null;
-        dialogPendingResult = null;
-        resolveFn(result);
-      }
-    }
+    const el = overlayStack.pop();
+    if(el) el.classList.remove('open');
   }
   window.addEventListener('popstate', (e) => {
     const target = (e.state && e.state.n) || 0;
     while(overlayStack.length > target){ closeTopOverlay(); }
   });
   function goBack(){ history.back(); }
-
-  // ---------- Custom dialog: replaces window.prompt/confirm/alert. Native
-  // dialogs are unreliable inside an installed/standalone PWA on many
-  // phones (can silently fail or freeze script execution), so every user
-  // interaction that used to rely on them now goes through this instead -
-  // it's a normal DOM overlay, fully integrated with the same back-button
-  // stack as every other screen. ----------
-  function showDialog(opts){
-    return new Promise((resolve) => {
-      dialogResolve = resolve;
-      dialogPendingResult = null;
-      customDialogMessage.textContent = opts.message || '';
-      if(opts.showInput){
-        customDialogInput.style.display = '';
-        customDialogInput.value = opts.defaultValue || '';
-      } else {
-        customDialogInput.style.display = 'none';
-      }
-      customDialogCancel.style.display = opts.hideCancel ? 'none' : '';
-      openOverlay(customDialogBackdrop);
-      if(opts.showInput){
-        setTimeout(() => { customDialogInput.focus(); customDialogInput.select(); }, 50);
-      }
-    });
-  }
-  function customPrompt(message, defaultValue){
-    return showDialog({ message, showInput: true, defaultValue });
-  }
-  function customConfirm(message){
-    return showDialog({ message, showInput: false }).then(r => r === true);
-  }
-  function customAlert(message){
-    return showDialog({ message, showInput: false, hideCancel: true });
-  }
-  customDialogOk.addEventListener('click', () => {
-    dialogPendingResult = (customDialogInput.style.display !== 'none') ? customDialogInput.value : true;
-    goBack();
-  });
-  customDialogCancel.addEventListener('click', () => {
-    dialogPendingResult = null;
-    goBack();
-  });
-  customDialogBackdrop.addEventListener('click', e => {
-    if(e.target === customDialogBackdrop){ dialogPendingResult = null; goBack(); }
-  });
-  customDialogInput.addEventListener('keydown', e => {
-    if(e.key === 'Enter'){ dialogPendingResult = customDialogInput.value; goBack(); }
-  });
 
   // ---------- Song reading view ----------
   let currentSongIdx = null;
@@ -4544,8 +4179,8 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     playlistsContainer.innerHTML = html;
   }
 
-  newPlaylistBtn.addEventListener('click', async () => {
-    const name = await customPrompt('Nazwa nowej setlisty:');
+  newPlaylistBtn.addEventListener('click', () => {
+    const name = prompt('Nazwa nowej setlisty:');
     if(!name || !name.trim()) return;
     const lists = loadPlaylists();
     const pl = { id: genId(), name: name.trim(), songs: [] };
@@ -4582,7 +4217,7 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
 
   syncBtn.addEventListener('click', async () => {
     const current = getSyncCode();
-    const input = await customPrompt(
+    const input = prompt(
       'Podaj kod synchronizacji - ten sam kod wpisany na innym urządzeniu automatycznie połączy Wasze setlisty.\n\nZostaw puste pole i zatwierdź, aby wyłączyć synchronizację.',
       current
     );
@@ -4599,7 +4234,7 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
       refreshSyncStatus();
       renderPlaylists();
     } catch(e){
-      await customAlert('Nie udało się połączyć z synchronizacją. Sprawdź połączenie z internetem i spróbuj ponownie.');
+      alert('Nie udało się połączyć z synchronizacją. Sprawdź połączenie z internetem i spróbuj ponownie.');
       refreshSyncStatus();
     }
   });
@@ -4612,12 +4247,12 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     }).catch(() => { refreshSyncStatus(); });
   }
 
-  playlistsContainer.addEventListener('click', async e => {
+  playlistsContainer.addEventListener('click', e => {
     const delBtn = e.target.closest('button.pl-del');
     if(delBtn){
       const id = delBtn.dataset.id;
       const pl = getPlaylist(id);
-      if(pl && await customConfirm('Usunąć setlistę "' + pl.name + '"?')){
+      if(pl && confirm('Usunąć setlistę "' + pl.name + '"?')){
         savePlaylists(loadPlaylists().filter(p => p.id !== id));
         renderPlaylists();
       }
@@ -4700,20 +4335,20 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
 
   pldBackBtn.addEventListener('click', goBack);
 
-  pldTitleBtn.addEventListener('click', async () => {
+  pldTitleBtn.addEventListener('click', () => {
     const pl = getPlaylist(currentPlaylistId);
     if(!pl) return;
-    const name = await customPrompt('Nowa nazwa setlisty:', pl.name);
+    const name = prompt('Nowa nazwa setlisty:', pl.name);
     if(!name || !name.trim()) return;
     updatePlaylist(currentPlaylistId, p => { p.name = name.trim(); });
     renderPlaylistDetailHeader();
     renderPlaylists();
   });
 
-  pldDeleteBtn.addEventListener('click', async () => {
+  pldDeleteBtn.addEventListener('click', () => {
     const pl = getPlaylist(currentPlaylistId);
     if(!pl) return;
-    if(await customConfirm('Usunąć setlistę "' + pl.name + '"?')){
+    if(confirm('Usunąć setlistę "' + pl.name + '"?')){
       savePlaylists(loadPlaylists().filter(p => p.id !== currentPlaylistId));
       renderPlaylists();
       goBack();
@@ -4818,9 +4453,9 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     });
     renderQuickAdd();
   });
-  quickAddNewBtn.addEventListener('click', async () => {
+  quickAddNewBtn.addEventListener('click', () => {
     if(currentSongIdx === null) return;
-    const name = await customPrompt('Nazwa nowej setlisty:');
+    const name = prompt('Nazwa nowej setlisty:');
     if(!name || !name.trim()) return;
     const title = SONGS[currentSongIdx].title;
     const lists = loadPlaylists();
