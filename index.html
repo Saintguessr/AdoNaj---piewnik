@@ -260,6 +260,25 @@
 </style>
 </head>
 <body>
+<div id="debugErrorBanner" style="display:none; position:fixed; top:0; left:0; right:0; z-index:99999; background:#dc2626; color:#fff; padding:10px 14px; font-family:monospace; font-size:12px; white-space:pre-wrap; max-height:45vh; overflow:auto; box-sizing:border-box;"></div>
+<script>
+(function(){
+  var banner = document.getElementById('debugErrorBanner');
+  function show(msg){
+    banner.style.display = 'block';
+    banner.textContent += (banner.textContent ? '\n\n---\n\n' : '') + msg;
+  }
+  window.addEventListener('error', function(e){
+    show('BŁĄD JS: ' + e.message + '\nplik: ' + (e.filename||'?') + ' linia:' + (e.lineno||'?') + ' kol:' + (e.colno||'?'));
+  });
+  window.addEventListener('unhandledrejection', function(e){
+    var r = e.reason;
+    var msg = (r && r.message) ? r.message : String(r);
+    show('NIEOBSŁUŻONY BŁĄD (Promise): ' + msg);
+  });
+  window.__spiewnikDebugShow = show;
+})();
+</script>
 <div id="app">
 
   <div id="list-view">
