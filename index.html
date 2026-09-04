@@ -110,6 +110,15 @@
   .pl-del:active{color:#f87171;}
 
   /* ---------- Detail view ---------- */
+  /* z-index:15 (not 10) and NOT conditional on .open - this must always
+     render above playlist-detail-view/playlist-picker-view (z-index 10/11)
+     because a song can be opened FROM WITHIN a setlist, in which case both
+     overlays are simultaneously marked "open" and this one needs to win
+     the stacking order. A past bug here: this used to sit at the SAME
+     z-index as the (closed) base state and never got bumped when opened,
+     so the song view was 100% functionally open (correct DOM state) but
+     invisible underneath the still-open setlist view. Keep this above
+     10/11 if you ever add more overlay layers. */
   #detail-view{
     position:fixed; inset:0; background:var(--bg); display:none; flex-direction:column; z-index:15;
   }
@@ -231,9 +240,54 @@
     padding:10px 14px; border-radius:10px; border:1px dashed var(--accent);
     background:none; color:var(--accent); font-size:14px; font-weight:700; cursor:pointer; width:100%;
   }
+
+  /* ---------- Custom dialog (replaces native prompt/confirm/alert, which
+     are unreliable inside an installed/standalone PWA on many phones) ---------- */
+  #customDialogBackdrop{
+    position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; z-index:30;
+    align-items:center; justify-content:center; padding:20px;
+  }
+  #customDialogBackdrop.open{display:flex;}
+  #customDialogSheet{
+    width:100%; max-width:360px; background:var(--bg2); border-radius:16px;
+    border:1px solid var(--border); padding:20px;
+  }
+  #customDialogMessage{
+    margin:0 0 14px; font-size:15px; color:var(--text); line-height:1.4; white-space:pre-line;
+  }
+  #customDialogInput{
+    width:100%; padding:11px 12px; border-radius:10px; border:1px solid var(--border);
+    background:var(--card2); color:var(--text); font-size:16px; outline:none; margin-bottom:16px; box-sizing:border-box;
+  }
+  #customDialogInput:focus{border-color:var(--accent);}
+  .dialog-buttons{display:flex; gap:10px; justify-content:flex-end;}
+  .dialog-buttons button{
+    padding:10px 18px; border-radius:10px; border:1px solid var(--border);
+    background:var(--card2); color:var(--text); font-size:14px; font-weight:700; cursor:pointer;
+  }
+  #customDialogOk{background:var(--accent); color:#1e1b0a; border-color:var(--accent);}
 </style>
 </head>
 <body>
+<div id="debugErrorBanner" style="display:none; position:fixed; top:0; left:0; right:0; z-index:99999; background:#dc2626; color:#fff; padding:10px 14px; font-family:monospace; font-size:12px; white-space:pre-wrap; max-height:45vh; overflow:auto; box-sizing:border-box;"></div>
+<script>
+(function(){
+  var banner = document.getElementById('debugErrorBanner');
+  function show(msg){
+    banner.style.display = 'block';
+    banner.textContent += (banner.textContent ? '\n\n---\n\n' : '') + msg;
+  }
+  window.addEventListener('error', function(e){
+    show('BŁĄD JS: ' + e.message + '\nplik: ' + (e.filename||'?') + ' linia:' + (e.lineno||'?') + ' kol:' + (e.colno||'?'));
+  });
+  window.addEventListener('unhandledrejection', function(e){
+    var r = e.reason;
+    var msg = (r && r.message) ? r.message : String(r);
+    show('NIEOBSŁUŻONY BŁĄD (Promise): ' + msg);
+  });
+  window.__spiewnikDebugShow = show;
+})();
+</script>
 <div id="app">
 
   <div id="list-view">
@@ -312,6 +366,17 @@
       <ul class="quick-pl-list" id="quickAddList"></ul>
       <div class="quick-new-row">
         <button id="quickAddNewBtn">+ Nowa setlista z tą pieśnią</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="customDialogBackdrop">
+    <div id="customDialogSheet">
+      <p id="customDialogMessage"></p>
+      <input id="customDialogInput" type="text" autocomplete="off">
+      <div class="dialog-buttons">
+        <button id="customDialogCancel">Anuluj</button>
+        <button id="customDialogOk">OK</button>
       </div>
     </div>
   </div>
@@ -396,7 +461,7 @@
   // ---------- Main app ----------
 (function(){
   const SONGS = [
-{ title: "Adorujmy Najwyższego - AdoNaj",
+  { title: "Adorujmy Najwyższego - AdoNaj",
     body: `a F G C
 Adorujmy Najwyższego
 F G C G F
@@ -2228,8 +2293,10 @@ Gdy wyznaję nędzę swą, jak Ojciec słuchasz mnie,
 a G C D7 e C G
 Gdy lęk śmierci mnie ogarnia, Ty umacniasz mnie.` },
   { title: "Panie, dobry jak chleb",
-    body: `C F G
-Ref. Panie, dobry jak chleb,
+    body: `
+Ref. 	
+	C F G
+Panie, dobry jak chleb,
 a F G
 Bądź uwielbiony od swego Kościoła,
 C e F C
@@ -2245,9 +2312,9 @@ a G C
 Tyś stał się manną wędrowców przez ziemię,
 G C G
 Dla tych, co dotąd przy Tobie wytrwali.
-
-C F G
-Ref. Panie, dobry jak chleb,
+Ref. 	
+	C F G
+Panie, dobry jak chleb,
 a F G
 Bądź uwielbiony od swego Kościoła,
 C e F C
@@ -2256,7 +2323,7 @@ d G C
 Do końca nas umiłował.
 
 2.
-C  d               G         d
+d               G         d
 Ziarna zbierzemy, odrzucimy chwasty,
 G        D               G
 Bo łan dojrzewa, pachnie świeżym chlebem,
@@ -2264,8 +2331,10 @@ a            G          C
 Niech ziemia nas stanie się ołtarzem,
 G       C                      G
 A chleb komunią dla spragnionych Ciebie.
-C F G
-Ref. Panie, dobry jak chleb,
+
+Ref. 	
+	C F G
+Panie, dobry jak chleb,
 a F G
 Bądź uwielbiony od swego Kościoła,
 C e F C
@@ -2274,7 +2343,7 @@ d G C
 Do końca nas umiłował.
 
 3.
-C  d               G             d
+d               G             d
 Ty nas nazwałeś swymi przyjaciółmi,
 G               D             G
 Jeśli spełnimy, co nam przykazałeś.
@@ -2283,8 +2352,9 @@ Cóż my bez Ciebie, Panie, uczynimy?
 G           C                G
 Tyś naszym życiem i oczekiwaniem.
 
-C F G
-Ref. Panie, dobry jak chleb,
+Ref. 	
+	C F G
+Panie, dobry jak chleb,
 a F G
 Bądź uwielbiony od swego Kościoła,
 C e F C
@@ -2293,7 +2363,7 @@ d G C
 Do końca nas umiłował.
 
 4.
-C  d               G           d
+d               G           d
 Tyś za nas życie swe oddał na krzyżu,
 G             D              G
 A w znaku chleba w świątyniach zostałeś,
@@ -2301,8 +2371,10 @@ a           G          C
 I dla nas zawsze masz otwarte serce,
 G        C               G
 Bo Ty do końca nas umiłowałeś.
-C F G
-Ref. Panie, dobry jak chleb,
+
+Ref. 	
+	C F G
+Panie, dobry jak chleb,
 a F G
 Bądź uwielbiony od swego Kościoła,
 C e F C
@@ -4227,7 +4299,6 @@ e D G a H7
 Już nie będę się bał – cóż może zrobić mi śmierć?
 e D G a H7
 Nie, nie lękam się i śpiewam chwały pieśń.` }
-
 ];
 
   const listContainer = document.getElementById('listContainer');
@@ -4268,6 +4339,12 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
   const quickAddSongTitle = document.getElementById('quickAddSongTitle');
   const quickAddList = document.getElementById('quickAddList');
   const quickAddNewBtn = document.getElementById('quickAddNewBtn');
+
+  const customDialogBackdrop = document.getElementById('customDialogBackdrop');
+  const customDialogMessage = document.getElementById('customDialogMessage');
+  const customDialogInput = document.getElementById('customDialogInput');
+  const customDialogCancel = document.getElementById('customDialogCancel');
+  const customDialogOk = document.getElementById('customDialogOk');
 
   function normalize(s){
     return s.toLowerCase()
@@ -4343,9 +4420,20 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     overlayStack.push(el);
     history.pushState({n: overlayStack.length}, '');
   }
+  let dialogResolve = null;
+  let dialogPendingResult = null;
   function closeTopOverlay(){
-    const el = overlayStack.pop();
-    if(el) el.classList.remove('open');
+    const elClosed = overlayStack.pop();
+    if(elClosed){
+      elClosed.classList.remove('open');
+      if(elClosed === customDialogBackdrop && dialogResolve){
+        const resolveFn = dialogResolve;
+        const result = dialogPendingResult;
+        dialogResolve = null;
+        dialogPendingResult = null;
+        resolveFn(result);
+      }
+    }
   }
   window.addEventListener('popstate', (e) => {
     const target = (e.state && e.state.n) || 0;
@@ -4353,11 +4441,60 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
   });
   function goBack(){ history.back(); }
 
+  // ---------- Custom dialog: replaces window.prompt/confirm/alert. Native
+  // dialogs are unreliable inside an installed/standalone PWA on many
+  // phones (can silently fail or freeze script execution), so every user
+  // interaction that used to rely on them now goes through this instead -
+  // it's a normal DOM overlay, fully integrated with the same back-button
+  // stack as every other screen. ----------
+  function showDialog(opts){
+    return new Promise((resolve) => {
+      dialogResolve = resolve;
+      dialogPendingResult = null;
+      customDialogMessage.textContent = opts.message || '';
+      if(opts.showInput){
+        customDialogInput.style.display = '';
+        customDialogInput.value = opts.defaultValue || '';
+      } else {
+        customDialogInput.style.display = 'none';
+      }
+      customDialogCancel.style.display = opts.hideCancel ? 'none' : '';
+      openOverlay(customDialogBackdrop);
+      if(opts.showInput){
+        setTimeout(() => { customDialogInput.focus(); customDialogInput.select(); }, 50);
+      }
+    });
+  }
+  function customPrompt(message, defaultValue){
+    return showDialog({ message, showInput: true, defaultValue });
+  }
+  function customConfirm(message){
+    return showDialog({ message, showInput: false }).then(r => r === true);
+  }
+  function customAlert(message){
+    return showDialog({ message, showInput: false, hideCancel: true });
+  }
+  customDialogOk.addEventListener('click', () => {
+    dialogPendingResult = (customDialogInput.style.display !== 'none') ? customDialogInput.value : true;
+    goBack();
+  });
+  customDialogCancel.addEventListener('click', () => {
+    dialogPendingResult = null;
+    goBack();
+  });
+  customDialogBackdrop.addEventListener('click', e => {
+    if(e.target === customDialogBackdrop){ dialogPendingResult = null; goBack(); }
+  });
+  customDialogInput.addEventListener('keydown', e => {
+    if(e.key === 'Enter'){ dialogPendingResult = customDialogInput.value; goBack(); }
+  });
+
   // ---------- Song reading view ----------
   let currentSongIdx = null;
   function openSong(idx){
     currentSongIdx = idx;
     const s = SONGS[idx];
+    if(!s) return;
     detailTitle.textContent = s.title;
     const lines = s.body.split('\n');
     const frag = document.createDocumentFragment();
@@ -4460,8 +4597,8 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     playlistsContainer.innerHTML = html;
   }
 
-  newPlaylistBtn.addEventListener('click', () => {
-    const name = prompt('Nazwa nowej setlisty:');
+  newPlaylistBtn.addEventListener('click', async () => {
+    const name = await customPrompt('Nazwa nowej setlisty:');
     if(!name || !name.trim()) return;
     const lists = loadPlaylists();
     const pl = { id: genId(), name: name.trim(), songs: [] };
@@ -4498,7 +4635,7 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
 
   syncBtn.addEventListener('click', async () => {
     const current = getSyncCode();
-    const input = prompt(
+    const input = await customPrompt(
       'Podaj kod synchronizacji - ten sam kod wpisany na innym urządzeniu automatycznie połączy Wasze setlisty.\n\nZostaw puste pole i zatwierdź, aby wyłączyć synchronizację.',
       current
     );
@@ -4515,7 +4652,7 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
       refreshSyncStatus();
       renderPlaylists();
     } catch(e){
-      alert('Nie udało się połączyć z synchronizacją. Sprawdź połączenie z internetem i spróbuj ponownie.');
+      await customAlert('Nie udało się połączyć z synchronizacją. Sprawdź połączenie z internetem i spróbuj ponownie.');
       refreshSyncStatus();
     }
   });
@@ -4528,12 +4665,12 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     }).catch(() => { refreshSyncStatus(); });
   }
 
-  playlistsContainer.addEventListener('click', e => {
+  playlistsContainer.addEventListener('click', async e => {
     const delBtn = e.target.closest('button.pl-del');
     if(delBtn){
       const id = delBtn.dataset.id;
       const pl = getPlaylist(id);
-      if(pl && confirm('Usunąć setlistę "' + pl.name + '"?')){
+      if(pl && await customConfirm('Usunąć setlistę "' + pl.name + '"?')){
         savePlaylists(loadPlaylists().filter(p => p.id !== id));
         renderPlaylists();
       }
@@ -4616,20 +4753,20 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
 
   pldBackBtn.addEventListener('click', goBack);
 
-  pldTitleBtn.addEventListener('click', () => {
+  pldTitleBtn.addEventListener('click', async () => {
     const pl = getPlaylist(currentPlaylistId);
     if(!pl) return;
-    const name = prompt('Nowa nazwa setlisty:', pl.name);
+    const name = await customPrompt('Nowa nazwa setlisty:', pl.name);
     if(!name || !name.trim()) return;
     updatePlaylist(currentPlaylistId, p => { p.name = name.trim(); });
     renderPlaylistDetailHeader();
     renderPlaylists();
   });
 
-  pldDeleteBtn.addEventListener('click', () => {
+  pldDeleteBtn.addEventListener('click', async () => {
     const pl = getPlaylist(currentPlaylistId);
     if(!pl) return;
-    if(confirm('Usunąć setlistę "' + pl.name + '"?')){
+    if(await customConfirm('Usunąć setlistę "' + pl.name + '"?')){
       savePlaylists(loadPlaylists().filter(p => p.id !== currentPlaylistId));
       renderPlaylists();
       goBack();
@@ -4734,9 +4871,9 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     });
     renderQuickAdd();
   });
-  quickAddNewBtn.addEventListener('click', () => {
+  quickAddNewBtn.addEventListener('click', async () => {
     if(currentSongIdx === null) return;
-    const name = prompt('Nazwa nowej setlisty:');
+    const name = await customPrompt('Nazwa nowej setlisty:');
     if(!name || !name.trim()) return;
     const title = SONGS[currentSongIdx].title;
     const lists = loadPlaylists();
@@ -4748,7 +4885,23 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
   render('');
 
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+    // Auto-update: force an immediate update check every time the app
+    // loads (rather than waiting for the browser's own, much lazier
+    // periodic check), and reload the page exactly once whenever a newly
+    // activated service worker takes control - this is what actually
+    // guarantees the freshest index.html is used without anyone needing
+    // to manually clear cache/cookies. skipWaiting()+clients.claim() in
+    // the service worker make the new one take control right away; this
+    // just makes sure the already-open page picks it up immediately too.
+    let refreshedOnce = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if(refreshedOnce) return;
+      refreshedOnce = true;
+      window.location.reload();
+    });
+    navigator.serviceWorker.register('service-worker.js').then(reg => {
+      reg.update();
+    }).catch(()=>{});
   }
 })();
 </script>
