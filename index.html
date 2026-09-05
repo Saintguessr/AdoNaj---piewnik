@@ -317,6 +317,20 @@
     </div>
   </div>
 
+  <div id="viewer-view" style="display:none; flex-direction:column; height:100%;">
+    <header>
+      <h1><span class="dot"><img src="icons/icon-192.png" alt="" style="height: 30px; vertical-align: middle;"></span> Śpiewnik AdoNaj</h1>
+      <div class="count">🔒 Udostępniona setlista - tylko do odczytu</div>
+    </header>
+    <div class="detail-header" style="background:transparent; border-bottom:1px solid var(--border);">
+      <div class="pld-title-btn" id="viewerTitle" style="cursor:default; font-size:18px;"></div>
+    </div>
+    <div id="viewerSongsContainer" style="flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;"></div>
+    <div style="padding:14px 16px calc(14px + var(--safe-bottom)); text-align:center;">
+      <a href="./" style="color:var(--muted); font-size:13px; text-decoration:underline;">Otwórz pełną aplikację</a>
+    </div>
+  </div>
+
   <div id="detail-view">
     <div class="detail-header">
       <button class="back-btn" id="backBtn">‹ Wróć</button>
@@ -338,6 +352,7 @@
         <button class="back-btn" id="pldBackBtn">‹ Wróć</button>
         <button class="pld-title-btn" id="pldTitleBtn"></button>
       </div>
+      <button class="pld-icon-btn" id="pldShareBtn" title="Udostępnij (tylko do odczytu)">🔗</button>
       <button class="pld-icon-btn" id="pldDeleteBtn" title="Usuń setlistę">🗑</button>
     </div>
     <div id="playlistSongsContainer"></div>
@@ -1124,7 +1139,7 @@ Panie nasz, króluj nam! Boże nasz, króluj nam!
 D             e          A           D
 Poprzez wieczny czas króluj, Jezu, nam!
 Ref.` },
-	   { title: "Credo / W to wierzę",
+  { title: "Credo / W to wierzę",
     body: `1.
 G
 Nasz Ojcze nieskończony
@@ -1743,24 +1758,7 @@ C
 Tylko Tobie będziemy się kłaniać
 G D
 Jezu!` },
-  { title: "Jezus najwyższe imię",
-    body: `C e a
-Jezus, Najwyższe Imię,
-d G
-Nasz Zbawiciel, Książę Pokoju,
-C e a
-Emmanuel, Bóg jest z nami,
-d G C C7
-Odkupiciel, Słowo Żywota!
-F G C a
-Święty Bóg, Mesjasz Prawdziwy,
-d G C C7
-Jedyny Ojca Syn, umiłowany,
-F G C a
-Zgładził grzech, Baranek na wieki,
-d G C (G)
-Królów Król i Panów Pan.` },
-	    { title: "Jezus - anMari",
+  { title: "Jezus - anMari",
     body: `
 	As                   Des       As
 Na Twojej piersi odpoczywam ja
@@ -1887,6 +1885,23 @@ tylko Jezus Chrystus Panem jest
 Ref. Jezus Jezus 
      G     a     e     C
      Jezus Jezus` },
+  { title: "Jezus najwyższe imię",
+    body: `C e a
+Jezus, Najwyższe Imię,
+d G
+Nasz Zbawiciel, Książę Pokoju,
+C e a
+Emmanuel, Bóg jest z nami,
+d G C C7
+Odkupiciel, Słowo Żywota!
+F G C a
+Święty Bóg, Mesjasz Prawdziwy,
+d G C C7
+Jedyny Ojca Syn, umiłowany,
+F G C a
+Zgładził grzech, Baranek na wieki,
+d G C (G)
+Królów Król i Panów Pan.` },
   { title: "Jezus zwyciężył",
     body: `d g
 Jezus zwyciężył, to wykonało się
@@ -2418,7 +2433,7 @@ F C d
 Wiedz, że robię to, bo Jestem
 B C
 Twym najlepszym przyjacielem!` },
-	  { title: "O Zbawcza Hostio",
+  { title: "O Zbawcza Hostio",
     body: `O Zbawcza Hostio godna czci
 Co lud do niebios wiedziesz bram
 Znój srogi nęka wiernych Ci
@@ -2590,8 +2605,7 @@ Objawiaj się wśród nas
 
 ` },
   { title: "Oceany - Hillsong UNITED",
-   
-   body: `
+    body: `
    124 BPM
    h fis D
 Znad oceanów do mnie wołasz
@@ -4829,6 +4843,10 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
   const pldBackBtn = document.getElementById('pldBackBtn');
   const pldTitleBtn = document.getElementById('pldTitleBtn');
   const pldDeleteBtn = document.getElementById('pldDeleteBtn');
+  const pldShareBtn = document.getElementById('pldShareBtn');
+  const viewerView = document.getElementById('viewer-view');
+  const viewerTitle = document.getElementById('viewerTitle');
+  const viewerSongsContainer = document.getElementById('viewerSongsContainer');
   const playlistSongsContainer = document.getElementById('playlistSongsContainer');
   const pldAddSongBtn = document.getElementById('pldAddSongBtn');
 
@@ -5276,6 +5294,18 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     }
   });
 
+  pldShareBtn.addEventListener('click', async () => {
+    const code = getSyncCode();
+    if(!code){
+      await customAlert('Aby udostępnić tę setlistę osobom z zewnątrz, najpierw włącz synchronizację (przycisk 🔄 w zakładce Setlisty) - link do odczytu pobiera dane z tej samej chmury, do której zapisują się Wasze zmiany.');
+      return;
+    }
+    const url = location.origin + location.pathname + '?view=' + encodeURIComponent(code) + '&pl=' + encodeURIComponent(currentPlaylistId);
+    let copied = false;
+    try { await navigator.clipboard.writeText(url); copied = true; } catch(e){ /* clipboard permission denied or unsupported - link is still shown below to copy manually */ }
+    await customPrompt((copied ? 'Link skopiowany do schowka!' : 'Skopiuj poniższy link ręcznie:') + '\nKażdy, kto go otworzy, zobaczy tę setlistę bez możliwości edycji.', url);
+  });
+
   pldAddSongBtn.addEventListener('click', () => {
     openPicker();
   });
@@ -5385,7 +5415,72 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     renderQuickAdd();
   });
 
-  render('');
+  // ---------- Read-only shared setlist viewer ----------
+  // Reached via a link like index.html?view=SYNCCODE&pl=PLAYLISTID (built
+  // by the 🔗 share button in a setlist's own header). Whoever opens this
+  // link sees that one setlist live from the cloud - browsable, tap a
+  // title to read its lyrics (via the exact same read-only lyrics screen
+  // everyone uses) - but with none of the edit/create/reorder/delete UI,
+  // since it never touches localStorage or savePlaylists() at all.
+  function renderViewerSongs(pl){
+    if(!pl){
+      viewerTitle.textContent = 'Nie znaleziono setlisty';
+      viewerSongsContainer.innerHTML = '<div class="empty">Sprawdź, czy link jest poprawny, albo poproś o nowy.</div>';
+      return;
+    }
+    viewerTitle.textContent = pl.name;
+    if(!pl.songs || pl.songs.length === 0){
+      viewerSongsContainer.innerHTML = '<div class="pld-empty">Ta setlista jest na razie pusta.</div>';
+      return;
+    }
+    let html = '<ul class="pld-songs">';
+    pl.songs.forEach((title, i) => {
+      const idx = titleToIdx[title];
+      const known = idx !== undefined;
+      html += '<li>'
+        + '<span class="pld-num">' + (i+1) + '.</span>'
+        + '<button class="pld-song-btn"' + (known ? ' data-idx="'+idx+'"' : ' disabled style="opacity:.4"') + '>' + escapeHtml(title) + '</button>'
+        + '</li>';
+    });
+    html += '</ul>';
+    viewerSongsContainer.innerHTML = html;
+  }
+  viewerSongsContainer.addEventListener('click', e => {
+    const btn = e.target.closest('button.pld-song-btn');
+    if(btn && btn.dataset.idx !== undefined){
+      openSong(parseInt(btn.dataset.idx,10));
+    }
+  });
+  async function initViewerMode(code, playlistId){
+    document.getElementById('list-view').style.display = 'none';
+    viewerView.style.display = 'flex';
+    viewerTitle.textContent = 'Wczytywanie…';
+    try {
+      await ensureAuth();
+      const ref = doc(fbDb, 'syncs', code);
+      const snap = await getDoc(ref);
+      const data = snap.exists() ? snap.data() : null;
+      const playlists = (data && data.playlists) || [];
+      renderViewerSongs(playlists.find(p => p.id === playlistId));
+      onSnapshot(ref, (snap2) => {
+        const d2 = snap2.exists() ? snap2.data() : null;
+        const pls2 = (d2 && d2.playlists) || [];
+        renderViewerSongs(pls2.find(p => p.id === playlistId));
+      }, () => { /* connection error - keep showing the last known state */ });
+    } catch(e){
+      viewerTitle.textContent = 'Błąd wczytywania';
+      viewerSongsContainer.innerHTML = '<div class="empty">Nie udało się połączyć z internetem. Spróbuj odświeżyć stronę.</div>';
+    }
+  }
+
+  const urlParams = new URLSearchParams(location.search);
+  const shareCode = urlParams.get('view');
+  const sharePlaylistId = urlParams.get('pl');
+  if(shareCode && sharePlaylistId){
+    initViewerMode(shareCode, sharePlaylistId);
+  } else {
+    render('');
+  }
 
   if('serviceWorker' in navigator){
     // Auto-update: force an immediate update check every time the app
