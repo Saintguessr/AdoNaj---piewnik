@@ -266,6 +266,67 @@
     background:var(--card2); color:var(--text); font-size:14px; font-weight:700; cursor:pointer;
   }
   #customDialogOk{background:var(--accent); color:#1e1b0a; border-color:var(--accent);}
+
+  /* ---------- Metronome ---------- */
+  #metronomeFab{
+    position:fixed; right:16px; bottom:calc(16px + var(--safe-bottom)); z-index:40;
+    width:52px; height:52px; border-radius:50%; border:none;
+    background:var(--card2); color:var(--accent); display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 14px rgba(0,0,0,.45); cursor:pointer;
+  }
+  #metronomeFab.playing{background:var(--accent); color:#1e1b0a;}
+  @keyframes met-flash-anim{
+    0%{ transform:scale(1.16); box-shadow:0 0 0 8px rgba(250,204,21,.35); }
+    100%{ transform:scale(1); box-shadow:0 4px 14px rgba(0,0,0,.45); }
+  }
+  @keyframes met-flash-accent-anim{
+    0%{ transform:scale(1.3); box-shadow:0 0 0 14px rgba(250,204,21,.55); }
+    100%{ transform:scale(1); box-shadow:0 4px 14px rgba(0,0,0,.45); }
+  }
+  #metronomeFab.met-flash{animation:met-flash-anim .15s ease-out;}
+  #metronomeFab.met-flash-accent{animation:met-flash-accent-anim .2s ease-out;}
+
+  #metronomePanel{
+    position:fixed; right:16px; bottom:calc(78px + var(--safe-bottom)); z-index:40;
+    width:240px; background:var(--bg2); border:1px solid var(--border); border-radius:16px;
+    padding:14px; box-shadow:0 8px 26px rgba(0,0,0,.55); display:none;
+  }
+  #metronomePanel.open{display:block;}
+  .met-header{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:12px; font-weight:700; font-size:14px; color:var(--text);
+  }
+  .met-bpm-row{display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:14px;}
+  .met-arrow{
+    width:38px; height:38px; border-radius:10px; border:1px solid var(--border);
+    background:var(--card2); color:var(--text); font-size:20px; cursor:pointer; flex-shrink:0;
+  }
+  .met-bpm-display{text-align:center; min-width:56px;}
+  #metBpmValue{font-size:32px; font-weight:800; color:var(--accent); display:block; line-height:1;}
+  .met-bpm-label{font-size:11px; color:var(--muted); letter-spacing:1px;}
+  .met-play-btn{
+    width:100%; padding:11px; border-radius:12px; border:none;
+    background:var(--accent); color:#1e1b0a; font-weight:700; font-size:15px;
+    margin-bottom:14px; cursor:pointer;
+  }
+  .met-play-btn.playing{background:#f87171; color:#1e1b0a;}
+  .met-row{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:10px; font-size:13px; color:var(--text);
+  }
+  .met-row-label{color:var(--muted);}
+  .met-stepper{display:flex; align-items:center; gap:8px;}
+  .met-arrow-sm{
+    width:26px; height:26px; border-radius:8px; border:1px solid var(--border);
+    background:var(--card2); color:var(--text); font-size:15px; cursor:pointer;
+  }
+  .met-accent-row input{width:18px; height:18px; accent-color:var(--accent);}
+  .met-sounds{display:flex; flex-direction:column; gap:6px;}
+  .met-sound-btn{
+    padding:8px 10px; border-radius:10px; border:1px solid var(--border);
+    background:var(--card2); color:var(--muted); font-size:12.5px; text-align:left; cursor:pointer;
+  }
+  .met-sound-btn.active{border-color:var(--accent); color:var(--accent); font-weight:700;}
 </style>
 </head>
 <body>
@@ -393,6 +454,53 @@
         <button id="customDialogCancel">Anuluj</button>
         <button id="customDialogOk">OK</button>
       </div>
+    </div>
+  </div>
+
+  <button id="metronomeFab" title="Metronom" aria-label="Metronom">
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2 L18 20 H6 Z"/>
+      <line x1="12" y1="6" x2="9" y2="17"/>
+      <circle cx="9" cy="17" r="1.4" fill="currentColor" stroke="none"/>
+    </svg>
+  </button>
+
+  <div id="metronomePanel">
+    <div class="met-header">
+      <span>Metronom</span>
+      <button id="metCloseBtn" class="pld-icon-btn" title="Zwiń">×</button>
+    </div>
+
+    <div class="met-bpm-row">
+      <button id="metBpmDown" class="met-arrow">−</button>
+      <div class="met-bpm-display"><span id="metBpmValue">100</span><span class="met-bpm-label">BPM</span></div>
+      <button id="metBpmUp" class="met-arrow">+</button>
+    </div>
+
+    <button id="metPlayBtn" class="met-play-btn">▶ Start</button>
+
+    <div class="met-row">
+      <span class="met-row-label">Akcent co ile miar:</span>
+      <div class="met-stepper">
+        <button id="metBeatsDown" class="met-arrow-sm">−</button>
+        <span id="metBeatsValue">4</span>
+        <button id="metBeatsUp" class="met-arrow-sm">+</button>
+      </div>
+    </div>
+
+    <label class="met-row met-accent-row">
+      <span class="met-row-label">Akcentuj pierwszą miarę</span>
+      <input type="checkbox" id="metAccentToggle" checked>
+    </label>
+
+    <div class="met-row">
+      <span class="met-row-label">Brzmienie:</span>
+    </div>
+    <div class="met-sounds" id="metSounds">
+      <button class="met-sound-btn" data-sound="woodblock">Blok drewniany</button>
+      <button class="met-sound-btn" data-sound="claves">Claves</button>
+      <button class="met-sound-btn" data-sound="click">Suchy klik</button>
+      <button class="met-sound-btn" data-sound="deep">Głębokie stuknięcie</button>
     </div>
   </div>
 
@@ -804,40 +912,20 @@ Błogosławieni miłosierni,
 E               H          Fis
 albowiem oni miłosierdzia dostąpią!` },
   { title: "Błogosławieństwo",
-    body: `
-	140 BPM
-	H                  E/H          
+    body: `H                  E/H          H/Dis
 Niech Pan Cię strzeże i błogosławi 
-H                      Fissus4                
+                       Fissus4               gis
 Rozjaśni oblicze nad tobą w miłosierdziu swym 
-gis               E/H     H
+                  E/H     H/Dis
 Niech twarz obróci ku tobie
      Fissus4       H
 I pokój swój da
 
-H                  E/H          
+H                  E/H          H/Dis
 Niech Pan Cię strzeże i błogosławi 
-H                      Fissus4                
+                       Fissus4               gis
 Rozjaśni oblicze nad tobą w miłosierdziu swym 
-gis               E/H     H
-Niech twarz obróci ku tobie
-     Fissus4       H
-I pokój swój da
-
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-
-H                  E/H          
-Niech Pan Cię strzeże i błogosławi 
-H                      Fissus4                
-Rozjaśni oblicze nad tobą w miłosierdziu swym 
-gis               E/H     H
+                  E/H     H/Dis
 Niech twarz obróci ku tobie
      Fissus4       H
 I pokój swój da
@@ -850,6 +938,24 @@ gis      E
 A - a - amen
 H   Fis
 A - amen
+
+H                  E/H          H/Dis
+Niech Pan Cię strzeże i błogosławi 
+                       Fissus4               gis
+Rozjaśni oblicze nad tobą w miłosierdziu swym 
+                  E/H     H/Dis
+Niech twarz obróci ku tobie
+     Fissus4       H
+I pokój swój da
+
+gis      E
+A - a - amen
+H   Fis
+A - amen
+gis      E
+A - a - amen
+H   Fis
+A - amen
 gis      E
 A - a - amen
 H   Fis
@@ -859,115 +965,58 @@ A - a - amen
 H   Fis
 A - amen
 
-gis
+       gis
 Niechaj Bóg cię błogosławi
    E
 Po tysięczne pokolenie
-H
+    H
 Twą rodzinę i twe dzieci
        Fis/Ais
 Twoje wnuki i ich dzieci
 
-gis
+       gis
 Niechaj Bóg cię błogosławi
    E
 Po tysięczne pokolenie
-H
+    H
 Twą rodzinę i twe dzieci
        Fis/Ais
 Twoje wnuki i ich dzieci
 
-gis
+       gis
 Niechaj Bóg cię błogosławi
    E
 Po tysięczne pokolenie
-H
+    H
 Twą rodzinę i twe dzieci
        Fis/Ais
 Twoje wnuki i ich dzieci
 
-gis
+       gis
 Niechaj Bóg cię błogosławi
    E
 Po tysięczne pokolenie
-H
+    H
 Twą rodzinę i twe dzieci
        Fis/Ais
 Twoje wnuki i ich dzieci
 
-gis
+       gis
 Niech obecność Jego Ducha
      E
 Cię otacza i prowadzi
-H
+    H
 Będzie w tobie i przy tobie
         Fis/Ais
 On jest z tobą
         Fis
 On jest z tobą
 
-gis
+    gis
 O poranku i wieczorem
         E
 W twoim przyjściu, w twoim wyjściu
-H
-W twoim płaczu i radości
-        Fis/Ais
-On jest z tobą
-      Fis
-I dla ciebie
-
-        gis   
-On jest z tobą i dla ciebie
-       E 
-On jest z tobą i dla ciebie
         H
-On jest z tobą i dla ciebie
-       Fis
-On jest z tobą
-
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-gis      E
-A - a - amen
-H   Fis
-A - amen
-
-gis
-Niechaj Bóg cię błogosławi
-   E
-Po tysięczne pokolenie
-H
-Twą rodzinę i twe dzieci
-       Fis/Ais
-Twoje wnuki i ich dzieci
-
-gis
-Niech obecność Jego Ducha
-     E
-Cię otacza i prowadzi
-H
-Będzie w tobie i przy tobie
-        Fis/Ais
-On jest z tobą
-        Fis
-On jest z tobą
-
-gis
-O poranku i wieczorem
-        E
-W twoim przyjściu, w twoim wyjściu
-H
 W twoim płaczu i radości
         Fis/Ais
 On jest z tobą
@@ -991,194 +1040,62 @@ gis      E
 A - a - amen
 H   Fis
 A - amen
-
-
-Capo 4
-
-G                  C/G          
-Niech Pan Cię strzeże i błogosławi 
-G                      Disus4                
-Rozjaśni oblicze nad tobą w miłosierdziu swym 
-e               C/G     G
-Niech twarz obróci ku tobie
-     Disus4       G
-I pokój swój da
-
-G                  C/G          
-Niech Pan Cię strzeże i błogosławi 
-G                      Disus4                
-Rozjaśni oblicze nad tobą w miłosierdziu swym 
-e               C/G     G
-Niech twarz obróci ku tobie
-     Disus4       G
-I pokój swój da
-
-e        C
+gis      E
 A - a - amen
-G   D
+H   Fis
 A - amen
-e        C
+gis      E
 A - a - amen
-G   D
+H   Fis
 A - amen
 
-G                  C/G          
-Niech Pan Cię strzeże i błogosławi 
-G                      Disus4                
-Rozjaśni oblicze nad tobą w miłosierdziu swym 
-e               C/G     G
-Niech twarz obróci ku tobie
-     Disus4       G
-I pokój swój da
-
-e        C
-A - a - amen
-G   D
-A - amen
-e        C
-A - a - amen
-G   D
-A - amen
-e        C
-A - a - amen
-G   D
-A - amen
-e        C
-A - a - amen
-G   D
-A - amen
-
-e
+       gis
 Niechaj Bóg cię błogosławi
-   C
+   E
 Po tysięczne pokolenie
-G
+    H
 Twą rodzinę i twe dzieci
-       D/Fis
+       Fis/Ais
 Twoje wnuki i ich dzieci
 
-e
-Niechaj Bóg cię błogosławi
-   C
-Po tysięczne pokolenie
-G
-Twą rodzinę i twe dzieci
-       D/Fis
-Twoje wnuki i ich dzieci
-
-e
-Niechaj Bóg cię błogosławi
-   C
-Po tysięczne pokolenie
-G
-Twą rodzinę i twe dzieci
-       D/Fis
-Twoje wnuki i ich dzieci
-
-e
-Niechaj Bóg cię błogosławi
-   C
-Po tysięczne pokolenie
-G
-Twą rodzinę i twe dzieci
-       D/Fis
-Twoje wnuki i ich dzieci
-
-e
+       gis
 Niech obecność Jego Ducha
-     C
+     E
 Cię otacza i prowadzi
-G
+    H
 Będzie w tobie i przy tobie
-        D/Fis
+        Fis/Ais
 On jest z tobą
-        D
+        Fis
 On jest z tobą
 
-e
+    gis
 O poranku i wieczorem
-        C
+        E
 W twoim przyjściu, w twoim wyjściu
-G
+        H
 W twoim płaczu i radości
-        D/Fis
+        Fis/Ais
 On jest z tobą
-      D
+      Fis
 I dla ciebie
 
-        e   
+        gis                E
 On jest z tobą i dla ciebie
-        C 
+        H                  Fis
 On jest z tobą i dla ciebie
-        G  
+        gis                E
 On jest z tobą i dla ciebie
-        D
+        H                  Fis
 On jest z tobą
 
-e        C
+gis      E
 A - a - amen
-G   D
+H   Fis
 A - amen
-e        C
+gis      E
 A - a - amen
-G   D
-A - amen
-e        C
-A - a - amen
-G   D
-A - amen
-e        C
-A - a - amen
-G   D
-A - amen
-
-e
-Niechaj Bóg cię błogosławi
-   C
-Po tysięczne pokolenie
-G
-Twą rodzinę i twe dzieci
-       D/Fis
-Twoje wnuki i ich dzieci
-
-e
-Niech obecność Jego Ducha
-     C
-Cię otacza i prowadzi
-G
-Będzie w tobie i przy tobie
-        D/Fis
-On jest z tobą
-        D
-On jest z tobą
-
-e
-O poranku i wieczorem
-        C
-W twoim przyjściu, w twoim wyjściu
-G
-W twoim płaczu i radości
-        D/Fis
-On jest z tobą
-      D
-I dla ciebie
-
-        e                  C
-On jest z tobą i dla ciebie
-        G                  D
-On jest z tobą i dla ciebie
-        e                  C
-On jest z tobą i dla ciebie
-        G                  D
-On jest z tobą
-
-e        C
-A - a - amen
-G   D
-A - amen
-e        C
-A - a - amen
-G   D
+H   Fis
 A - amen` },
   { title: "Bóg nad swym ludem zmiłował się",
     body: `1.
@@ -2634,18 +2551,15 @@ Niech będzie chwała w każdy czas
 Niech on wieczystym życiem swym
 W ojczyźnie rajskiej darzy nas. Amen` },
   { title: "Objawiaj się wśród nas",
-    body: ` 70 BPM
-	[Intro]
+    body: `[Intro]
 C D h e
 
 [Chorus]
-   C     				     D       			h
-Yahweh , 				    Rafa, 			Elohim
-<Jestem, który Jestem> <Pan, który uzdrawia> <Bóg>
-   e      		 C       				D
-Shaddai, 		Jireh, 				Adonai
-<Wszechmocny> <Pan się zatroszczy> <mój Pan>        
-e
+   C      D        h
+Yahweh, Rafa, Elohim
+   e       C       D
+Shaddai, Jireh, Adonai
+                   e
 Objawiaj się wśród nas
 
 [Verse 1]
@@ -3641,14 +3555,6 @@ E              H
 „Wielkie rzeczy im Pan uczynił!”
 fis           A
 Pan uczynił nam wielkie rzeczy
-E   H          
-i radość nas ogarnęła!
-H               A
-Mówiono wtedy między narodami:
-E              H
-„Wielkie rzeczy im Pan uczynił!”
-fis           A
-Pan uczynił nam wielkie rzeczy
 E   H          fis cis H A E
 i radość nas ogarnęła!
 
@@ -3662,15 +3568,7 @@ powrócą z radością, niosąc swoje snopy.
 
 Ref.
 H               A
-Mówiono wtedy między narodami:
-E              H
-„Wielkie rzeczy im Pan uczynił!”
-fis           A
-Pan uczynił nam wielkie rzeczy
-E   H          
-i radość nas ogarnęła!
-H               A
-Mówiono wtedy między narodami:
+Powiedzą wtedy między narodami:
 E              H
 „Wielkie rzeczy im Pan uczynił!”
 fis           A
@@ -3706,7 +3604,7 @@ E              H
 „Wielkie rzeczy im Pan uczynił!”
 fis           A
 Pan uczynił nam wielkie rzeczy
-E   H          
+E   H          fis cis H A E
 i radość nas ogarnęła!
 
 H                       A
@@ -3715,25 +3613,8 @@ E              H
 „Wielkie rzeczy im Pan uczynił!”
 fis           A
 Pan uczynił nam wielkie rzeczy
-E   H         
-i radość nas ogarnęła!
-H               A
-Mówiono wtedy między narodami:
-E              H
-„Wielkie rzeczy im Pan uczynił!”
-fis           A
-Pan uczynił nam wielkie rzeczy
-E   H          
-i radość nas ogarnęła!
-H               A
-Mówiono wtedy między narodami:
-E              H
-„Wielkie rzeczy im Pan uczynił!”
-fis           A
-Pan uczynił nam wielkie rzeczy
 E   H          fis cis H A E
-i radość nas ogarnęła!
-` },
+i radość nas ogarnęła!` },
   { title: "Psalm 148",
     body: `Ref.
 a   G   F   E a
@@ -4110,308 +3991,287 @@ Tak mnie wypal, Panie,
 C d A
 Byś został tylko Ty, byś został tylko Ty jedynie Ty!` },
   { title: "Taki jesteś Ty (Wszechmocny)",
-    body: `
-	68 BPM
-	
-	WSTĘP
-G D A h
-G D A h
-
-ZWROTKA 1
-G          D
+    body: `Wstęp:
+D A E fis
+D A E fis
+Zwrotka 1:
+D A
 Jesteś tu, jesteś pośród nas
-A          h
+E fis
 Uwielbiam Cię, uwielbiam Cię
-G          D
+D A
 Jesteś tu, działasz w każdym z nas
-A          h
+E fis
 Uwielbiam Cię, uwielbiam Cię
-G          D
+D A
 Jesteś tu, jesteś pośród nas
-A          h
+E fis
 Uwielbiam Cię, uwielbiam Cię
-G          D
+D A
 Jesteś tu, działasz w każdym z nas
-A          h
+E fis
 Uwielbiam Cię, uwielbiam Cię
-
-REFREN
-G
+Refren:
+D
 Jesteś Wszechmocny, Ty czynisz cuda
-D        A
+A E
 Jesteś drogą, światłem w ciemności, o tak
-h
+fis
 Taki jesteś Ty
-G
+D
 Jesteś Wszechmocny, Ty czynisz cuda
-D        A
+A E
 Jesteś drogą, światłem w ciemności, o tak
-h
+fis
 Taki jesteś Ty
-
-ZWROTKA 2
-G          D
+Zwrotka 2:
+D A
 Jesteś tu i dotykasz serc
-A          h
+E fis
 Uwielbiam Cię, uwielbiam Cię
-G          D
+D A
 Jesteś tu, leczysz każde z serc
-A          h
+E fis
 Uwielbiam Cię, uwielbiam Cię (jesteś tu)
-G          D
+D A
 Jesteś tu, zmieniasz życie me (zmieniasz życie me)
-A
+E
 Uwielbiam Cię (uwielbiam Cię)
-h
+fis
 Uwielbiam Cię (uwielbiam Cię)
-G          D
+D A
 Jesteś tu i odnawiasz mnie
-A          h
+E fis
 Uwielbiam Cię, uwielbiam Cię
-
-REFREN
-G
+Refren:
+D
 Wszechmocny, Ty czynisz cuda
-D        A
+A E
 Jesteś drogą, światłem w ciemności, o tak
-h
+fis
 Taki jesteś Ty (Ty jesteś... Ty jesteś!)
-G
+D
 Wszechmocny, Ty czynisz cuda
-D        A
+A E
 Jesteś drogą, światłem w ciemności, o tak
-h
+fis
 Taki jesteś Ty (jesteś!)
-G
+D
 Wszechmocny, Ty czynisz cuda
-D        A
+A E
 Jesteś drogą, światłem w ciemności, o tak
-h
+fis
 Taki jesteś Ty (jesteś Ty jesteś!)
-G
+D
 Wszechmocny, Ty czynisz cuda
-D        A
+A E
 Jesteś drogą, światłem w ciemności, o tak
-h
+fis
 Taki jesteś Ty
-
-CODA 1
-G
-Taki jesteś Ty (taki jesteś)
+Coda 1:
 D
 Taki jesteś Ty (taki jesteś)
 A
+Taki jesteś Ty (taki jesteś)
+E
 Taki jesteś Ty
-h
+fis
 Taki jesteś Ty (mój Jezu)
-G
-Taki jesteś Ty
 D
 Taki jesteś Ty
 A
 Taki jesteś Ty
-h
+E
 Taki jesteś Ty
-
-G D A h
+fis
+Taki jesteś Ty
+D A E fis
 Mój Jezu, Mój Jezu, taki jesteś
-
-BRIDGE
-G
+Bridge: (x4)
+D
 Choć czasem tego nie widzę, Ty działasz
-D
+A
 Choć czasem tego nie czuję, Ty działasz
-A
+E
 Nie zmieniasz się i wiem, że wciąż działasz
-h
-Nie zmieniasz się i wiem, że wciąż działasz   x4
-
-REFREN
-G
+fis
+Nie zmieniasz się i wiem, że wciąż działasz
+Refren:
+D
 Wszechmocny, Ty czynisz cuda
-D        A
+A E
 Jesteś drogą, światłem w ciemności, o tak
-h
+fis
 Taki jesteś Ty, taki jesteś, Ty jesteś!
-G
+D
 Wszechmocny, Ty czynisz cuda
-D        A
+A E
 Jesteś drogą, światłem w ciemności, o tak
-h
+fis
 Taki jesteś Ty
-
-CODA 2
-G
-Taki jesteś Ty
+Coda 2:
 D
 Taki jesteś Ty
 A
 Taki jesteś Ty
-h
+E
+Taki jesteś Ty
+fis
 Taki jesteś Ty mój Jezu
-G
+D
+Taki jesteś Ty
+A
+Taki jesteś Ty (jesteś Ty)
+E
+Taki jesteś Ty
+fis
+Taki jesteś Ty (Ty jesteś)
+Refren:
+D
+Jesteś Wszechmocny, Ty czynisz cuda
+A E
+Jesteś drogą, światłem w ciemności, o tak
+fis
 Taki jesteś Ty
 D
-Taki jesteś Ty (jesteś Ty)
-A
-Taki jesteś Ty
-h
-Taki jesteś Ty (Ty jesteś)
-
-REFREN
-G
 Jesteś Wszechmocny, Ty czynisz cuda
-D        A
+A E
 Jesteś drogą, światłem w ciemności, o tak
-h
-Taki jesteś Ty
-G
-Jesteś Wszechmocny, Ty czynisz cuda
-D        A
-Jesteś drogą, światłem w ciemności, o tak
-h G
+fis D
 Taki jesteś Ty` },
   { title: "To i ja - Hillsong UNITED",
     body: `
 	65 BPM
 	ZWROTKA 1
-D
+E
 Stwórco istnienia
-fis
+gis
 Zanim był czas
-E   D    (fis E)
+Fis E (gis Fis)
 Zanim rozpoczął się świat
-D
+E
 Gdzie chaos i ciemność
-fis
+gis
 Na dźwięk Twoich słów
-E   D    (A E)
+Fis E (H Fis)
 Nagle pojawił się blask
 
 REFREN 1
-A
+H
 I na Twój głos
-A   fis  E
+H gis Fis
 Galaktyk sto miliardów rodzi się
-E   A   D
+Fis H E
 A oddech Twój początkiem planet jest
-fis   E   A
+gis Fis H
 Jeśli gwiazdy Ciebie wielbią, to i ja
-
-A   fis  E
+H gis Fis
 Widzę serce Twoje w każdym z Twoich dzieł
-E
+Fis
 Światło wszystkich gwiazd
-A   D
+H E
 Odbiciem łaski jest
-fis   E   A
+gis Fis H
 Jeśli wszechświat Ciebie chwali, to i ja
-A   fis  E
-To i ja   (E A)
-
+H gis Fis
+To i ja
+(Fis H)
 ZWROTKA 2
-D
+E
 Boże obietnic
-fis
+gis
 Twe słowo ma moc
-E   D    (fis E)
+Fis E (gis Fis)
 Na wieki nie zmieni się już
-D          fis
-Ty raz przemówiłeś, nauka i świat
-E   D    (A E)
+E gis
+Ty raz przemówiłeś nauka i świat
+Fis E (H Fis)
 Idą za dźwiękiem Twych słów
 
 REFREN 2
-A
+H
 I na Twój głos
-A   fis  E
+H gis Fis
 Ze sto miliardów stworzeń bierze wdech
-E   A   D
+Fis H E
 By Twój odwieczny plan wypełnił się
-fis   E   A
+gis Fis H
 Jeśli to objawia Ciebie, to i ja
-
-A   fis  E
+H gis Fis
 Widzę serce Twoje w każdym z Twoich dzieł
-E
+Fis
 Niebo pełne barw
-A   D
+H E
 Obrazem łaski jest
-fis   E   A
+gis Fis H
 Jeśli wszystko słucha Ciebie, to i ja
-A   fis  E     (E A)
+H gis Fis (Fis H)
 To i ja
-
 BRIDGE
-D     fis E
+E gis Fis
 Jeśli gwiazdy Ciebie wielbią, to i ja
-D     fis E
+E gis Fis
 Jeśli góry się kłaniają, to i ja
-D     fis E
+E gis Fis
 Jeśli morza głoszą chwałę, to i ja
-D     fis E
+E gis Fis
 Jeśli wszystko Cię wywyższa, Stwórco nasz
-D     fis E
+E gis Fis
 To i ja
 
-D     fis E
+E gis Fis
 Jeśli wiatr Ci jest posłuszny, to i ja
-D     fis E
+E gis Fis
 Jeśli kamień głos podnosi, to i ja
-D     fis E
+E gis Fis
 Wiem, że więcej niż to wszystko jesteś wart
-D     fis E
+E gis Fis
 Więc zaśpiewam na Twą chwałę jeszcze raz
-
-D  fis  E
-ooo          x2
-
-Uwielbiony bądź, Błogosławiony bądź   x2
+E gis Fis
+ooo	x2
+Uwielbiony bądź, Błogosławiony bądź x2
 
 ZWROTKA 3
-D          fis  E
+E gis Fis
 Boże zbawienia
 Znalazłeś mnie, gdy
-D          fis  E
+E gis Fis
 Zgubiła mnie duma i grzech
-D          fis  E
+E gis Fis
 Na górze cierpienia
 Jedyny Twój Syn
-Był za mnie wydany na śmierć   D (A E)
+Był za mnie wydany na śmierć 				E ( H Fis)
 
 REFREN 3
-A
+H
 I na Twój głos
-A   fis  E
+H gis Fis
 Ze sto miliardów błędów znika gdzieś
-E   A   D
+Fis H E
 Życia zrzekłeś się, by mi darować je
-fis   E   A
+gis Fis H
 Jeśli Ty powstałeś z martwych, to i ja
-
-A   fis  E
+H gis Fis
 Widzę serce Twoje w każdej z Twoich ran
-E   A   D
+Fis H E
 Arcydzieło Twe na imię Miłość ma
-fis   E   A
+gis Fis H
 Jeśli Ty się uniżyłeś, to i ja
-
-A
+H
 Widzę serce Twe
-fis E
+gis Fis
 W miliardach wszystkich nas
-E
+Fis
 Każdy cenny jest
-A   D
+H E
 Imiona wszystkich znasz
-fis   E   A
+gis Fis H
 Jeśli żyłeś, żeby kochać, to i ja
-
-A   fis  E
+H gis Fis
 Wiem, że zrobiłbyś to wszystko jeszcze raz
-E   A   D
+Fis H E
 Ukochałeś nas już zanim powstał świat
-fis   E   A
+gis Fis H
 Ty byś wszystko oddał za jednego z nas` },
   { title: "Ty obecny wśród nas - Mocni w Duchu",
     body: `
@@ -4643,9 +4503,7 @@ Chcę Ci dziękować ze wszystkich sił
 e D
 Dajesz mi siebie bym na wieki żył.` },
   { title: "Wdzięczność (Gratitude) - Brandon Lake",
-    body: ` 
-	50 BPM Capo 1
-	ZWROTKA 1
+    body: ` ZWROTKA 1
 F
 Jakich użyć słów
 d
@@ -4733,138 +4591,9 @@ Prócz serca, co śpiewa Mu
 B d C F
 Alleluja, alleluja
 
-
-ZWROTKA 1
-Fis
-Jakich użyć słów
-dis
-Jak wyrazić to
-Cis
-Jak opisać mam
-H
-Całą wdzięczność mą
-
-ZWROTKA 2
-Fis
-Mogę śpiewać Ci
-dis
-Co dzień inną pieśń
-Cis
-Chociaż czuję, że
-H
-To tak mała rzecz
-
-REFREN
-Fis
-Więc podnoszę me ręce
-Cis
-I znowu oddaję Ci cześć
-Bo wszystko, co mam dziś
-H dis Cis
-To alleluja, alleluja
-Fis
-Nie wiem, co mogę dać
-Cis
-Z czego mógłby ucieszyć się Król
-Prócz serca, co śpiewa Mu
-H dis Cis Fis
-Alleluja, alleluja
-
-ZWROTKA 3
-Fis
-To, co mogę dać
-dis
-To ta jedna rzecz
-Cis
-Z całych moich sił
-H
-Będę wielbić Cię
-
-REFREN
-Fis
-Więc podnoszę me ręce
-Cis
-I znowu oddaję Ci cześć
-Bo wszystko, co mam dziś
-H dis Cis
-To alleluja, alleluja
-Fis
-Nie wiem, co mogę dać
-Cis
-Z czego mógłby ucieszyć się Król
-Prócz serca, co śpiewa Mu
-H dis Cis Fis
-Alleluja, alleluja
-
-BRIDGE
-Fis
-O, duszo ma, nie milcz już więcej
-Cis
-I podnieś swój głos, bo lew w tobie drzemie
-H
-Twój Bóg dał ci moc
-Fis Cis
-Powstań, uwielbij Go   x2
-
-REFREN
-Fis
-Więc podnoszę me ręce
-Cis
-I znowu oddaję Ci cześć
-Bo wszystko, co mam dziś
-H dis Cis
-To alleluja, alleluja
-Fis
-Nie wiem, co mogę dać
-Cis
-Z czego mógłby ucieszyć się Król
-Prócz serca, co śpiewa Mu
-H dis Cis Fis
-Alleluja, alleluja` },
-	  
-  { title: "Widzę dom",
-    body: `C                    F        C
-1.Widzę dom, w nim otwarte drzwi
-  a       G        F
-Ojciec czeka na mnie w nich
-  C                F     C
-Woła mnie, wiem że mogę wejść
-  a     G       F
-On opatrzy rany me
-  a     G        F
-Wiele bitew za mną jest
-
-     C            F
-Ref. To czas by ucztować
-                  a
-     W sercu mam pokój
-                 G
-     Gdy wokół wojna
-                 F
-     Na oczach moich wrogów
-              C
-     Pan zastawia stół
-
-     C            F
-     To czas by ucztować
-                  a
-     W sercu mam pokój
-                 G
-     Gdy wokół wojna
-                 F
-     Na oczach moich wrogów
-              C
-     Pan zastawia stół
-
-BRIDGE
-C                        F
-Strach nie ma wstępu do tego domu
-a                      F
-Oskarżyciele nie mają głosu
-a                   F           C
-Pan sam pokonał moich wrogów
-` },
-	  
+OUTRO
+F Es B b
+(Alleluja)` },
   { title: "Wielbię Ciebie",
     body: `Wielbię Ciebie w każdym momencie,
 O żywy chlebie nasz w tym sakramencie,
@@ -5851,6 +5580,208 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
       viewerSongsContainer.innerHTML = '<div class="empty">Nie udało się połączyć z internetem. Spróbuj odświeżyć stronę.</div>';
     }
   }
+
+  // ---------- Metronome ----------
+  // Synthesizes its own "wooden" click sounds with the Web Audio API (short
+  // filtered noise bursts - no audio files needed) and uses the standard
+  // look-ahead scheduler pattern (audioCtx.currentTime as the clock, not
+  // setInterval/setTimeout directly) so tempo stays accurate instead of
+  // drifting. Floats above every other screen via a fixed corner button;
+  // collapsing the panel does NOT stop playback, it keeps ticking in the
+  // background and the button itself pulses on every beat as an indicator.
+  const metronomeFab = document.getElementById('metronomeFab');
+  const metronomePanel = document.getElementById('metronomePanel');
+  const metCloseBtn = document.getElementById('metCloseBtn');
+  const metBpmValue = document.getElementById('metBpmValue');
+  const metBpmDown = document.getElementById('metBpmDown');
+  const metBpmUp = document.getElementById('metBpmUp');
+  const metPlayBtn = document.getElementById('metPlayBtn');
+  const metBeatsValue = document.getElementById('metBeatsValue');
+  const metBeatsDown = document.getElementById('metBeatsDown');
+  const metBeatsUp = document.getElementById('metBeatsUp');
+  const metAccentToggle = document.getElementById('metAccentToggle');
+  const metSounds = document.getElementById('metSounds');
+
+  function loadMetronomeSettings(){
+    try {
+      const raw = localStorage.getItem('spiewnik_metronome');
+      const s = raw ? JSON.parse(raw) : {};
+      return {
+        bpm: s.bpm || 100,
+        beatsPerBar: s.beatsPerBar || 4,
+        accentEnabled: s.accentEnabled !== false,
+        soundType: s.soundType || 'woodblock',
+      };
+    } catch(e){
+      return { bpm:100, beatsPerBar:4, accentEnabled:true, soundType:'woodblock' };
+    }
+  }
+  const metState = loadMetronomeSettings();
+  function saveMetronomeSettings(){
+    try {
+      localStorage.setItem('spiewnik_metronome', JSON.stringify({
+        bpm: metState.bpm, beatsPerBar: metState.beatsPerBar,
+        accentEnabled: metState.accentEnabled, soundType: metState.soundType,
+      }));
+    } catch(e){}
+  }
+
+  let metAudioCtx = null;
+  let metIsPlaying = false;
+  let metCurrentBeat = 0;
+  let metNextNoteTime = 0.0;
+  let metSchedulerTimer = null;
+  const MET_LOOKAHEAD_MS = 25.0;
+  const MET_SCHEDULE_AHEAD_SEC = 0.1;
+
+  function metGetAudioCtx(){
+    if(!metAudioCtx) metAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return metAudioCtx;
+  }
+
+  const MET_SOUND_CFG = {
+    woodblock: { normal:1200, accent:1600, q:7,  decay:0.055 },
+    claves:    { normal:2600, accent:3200, q:10, decay:0.035 },
+    click:     { normal:1800, accent:2200, q:18, decay:0.02 },
+    deep:      { normal:550,  accent:750,  q:5,  decay:0.09 },
+  };
+
+  function metPlayClick(time, isAccent){
+    const ctx = metGetAudioCtx();
+    const cfg = MET_SOUND_CFG[metState.soundType] || MET_SOUND_CFG.woodblock;
+    const dur = cfg.decay + 0.02;
+    const bufferSize = Math.max(1, Math.floor(ctx.sampleRate * dur));
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for(let i=0;i<bufferSize;i++){ data[i] = Math.random()*2-1; }
+
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const bandpass = ctx.createBiquadFilter();
+    bandpass.type = 'bandpass';
+    bandpass.frequency.value = isAccent ? cfg.accent : cfg.normal;
+    bandpass.Q.value = cfg.q;
+
+    const gainNode = ctx.createGain();
+    const peak = isAccent ? 0.95 : 0.55;
+    gainNode.gain.setValueAtTime(peak, time);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, time + cfg.decay);
+
+    noise.connect(bandpass);
+    bandpass.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    noise.start(time);
+    noise.stop(time + dur);
+  }
+
+  function metFlashBeat(isAccent){
+    metronomeFab.classList.remove('met-flash', 'met-flash-accent');
+    void metronomeFab.offsetWidth;
+    metronomeFab.classList.add(isAccent ? 'met-flash-accent' : 'met-flash');
+  }
+
+  function metScheduler(){
+    const ctx = metGetAudioCtx();
+    while(metNextNoteTime < ctx.currentTime + MET_SCHEDULE_AHEAD_SEC){
+      const isAccent = metState.accentEnabled && (metCurrentBeat % metState.beatsPerBar === 0);
+      metPlayClick(metNextNoteTime, isAccent);
+      const delayMs = Math.max(0, (metNextNoteTime - ctx.currentTime) * 1000);
+      setTimeout(() => metFlashBeat(isAccent), delayMs);
+      metNextNoteTime += 60.0 / metState.bpm;
+      metCurrentBeat = (metCurrentBeat + 1) % metState.beatsPerBar;
+    }
+  }
+
+  function metStart(){
+    if(metIsPlaying) return;
+    metIsPlaying = true;
+    metCurrentBeat = 0;
+    const ctx = metGetAudioCtx();
+    if(ctx.state === 'suspended') ctx.resume();
+    metNextNoteTime = ctx.currentTime + 0.05;
+    metSchedulerTimer = setInterval(metScheduler, MET_LOOKAHEAD_MS);
+    metronomeFab.classList.add('playing');
+    metPlayBtn.textContent = '⏸ Stop';
+    metPlayBtn.classList.add('playing');
+  }
+  function metStop(){
+    metIsPlaying = false;
+    clearInterval(metSchedulerTimer);
+    metronomeFab.classList.remove('playing');
+    metPlayBtn.textContent = '▶ Start';
+    metPlayBtn.classList.remove('playing');
+  }
+
+  function metRenderState(){
+    metBpmValue.textContent = metState.bpm;
+    metBeatsValue.textContent = metState.beatsPerBar;
+    metAccentToggle.checked = metState.accentEnabled;
+    Array.prototype.forEach.call(metSounds.children, btn => {
+      btn.classList.toggle('active', btn.dataset.sound === metState.soundType);
+    });
+  }
+  metRenderState();
+
+  metronomeFab.addEventListener('click', () => {
+    metronomePanel.classList.toggle('open');
+  });
+  metCloseBtn.addEventListener('click', () => {
+    metronomePanel.classList.remove('open');
+  });
+  metPlayBtn.addEventListener('click', () => {
+    if(metIsPlaying) metStop(); else metStart();
+  });
+
+  function metChangeBpm(delta){
+    metState.bpm = Math.max(30, Math.min(280, metState.bpm + delta));
+    metRenderState();
+    saveMetronomeSettings();
+  }
+  function metSetupHold(btn, fn){
+    let holdTimeout = null, holdInterval = null;
+    const start = (e) => {
+      if(e && e.cancelable) e.preventDefault();
+      fn();
+      holdTimeout = setTimeout(() => { holdInterval = setInterval(fn, 90); }, 400);
+    };
+    const stop = () => { clearTimeout(holdTimeout); clearInterval(holdInterval); };
+    btn.addEventListener('mousedown', start);
+    btn.addEventListener('touchstart', start, { passive:false });
+    ['mouseup','mouseleave','touchend','touchcancel'].forEach(ev => btn.addEventListener(ev, stop));
+  }
+  metSetupHold(metBpmDown, () => metChangeBpm(-1));
+  metSetupHold(metBpmUp, () => metChangeBpm(1));
+
+  metBeatsDown.addEventListener('click', () => {
+    metState.beatsPerBar = Math.max(2, metState.beatsPerBar - 1);
+    metRenderState();
+    saveMetronomeSettings();
+  });
+  metBeatsUp.addEventListener('click', () => {
+    metState.beatsPerBar = Math.min(12, metState.beatsPerBar + 1);
+    metRenderState();
+    saveMetronomeSettings();
+  });
+
+  metAccentToggle.addEventListener('change', () => {
+    metState.accentEnabled = metAccentToggle.checked;
+    saveMetronomeSettings();
+  });
+
+  metSounds.addEventListener('click', e => {
+    const btn = e.target.closest('button.met-sound-btn');
+    if(!btn) return;
+    metState.soundType = btn.dataset.sound;
+    metRenderState();
+    saveMetronomeSettings();
+    if(!metIsPlaying){
+      const ctx = metGetAudioCtx();
+      if(ctx.state === 'suspended') ctx.resume();
+      metPlayClick(ctx.currentTime + 0.02, false);
+    }
+  });
 
   const urlParams = new URLSearchParams(location.search);
   const shareCode = urlParams.get('view');
