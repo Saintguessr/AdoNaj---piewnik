@@ -1153,20 +1153,20 @@ Capo 4
 
 G                  C/G          
 Niech Pan Cię strzeże i błogosławi 
-G                      Disus4                
+G                      Dsus4                
 Rozjaśni oblicze nad tobą w miłosierdziu swym 
 e               C/G     G
 Niech twarz obróci ku tobie
-     Disus4       G
+     Dsus4       G
 I pokój swój da
 
 G                  C/G          
 Niech Pan Cię strzeże i błogosławi 
-G                      Disus4                
+G                      Dsus4                
 Rozjaśni oblicze nad tobą w miłosierdziu swym 
 e               C/G     G
 Niech twarz obróci ku tobie
-     Disus4       G
+     Dsus4       G
 I pokój swój da
 
 e        C
@@ -1180,11 +1180,11 @@ A - amen
 
 G                  C/G          
 Niech Pan Cię strzeże i błogosławi 
-G                      Disus4                
+G                      Dsus4                
 Rozjaśni oblicze nad tobą w miłosierdziu swym 
 e               C/G     G
 Niech twarz obróci ku tobie
-     Disus4       G
+     Dsus4       G
 I pokój swój da
 
 e        C
@@ -6071,6 +6071,20 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     const tokens = trimmed.split(/\s+/);
     return tokens.every(t => t === '|' || t === '||' || CHORD_TOKEN.test(t));
   }
+  // A line that only carries tempo/time-signature/capo info (e.g. "158 BPM 3/4",
+  // "Capo 4", "120 BPM Capo 1", "WERSJA Z CAPO 1") rather than actual lyrics -
+  // useful while playing, but meaningless (and distracting) as a projected slide.
+  function isMetaInfoLineForExport(line){
+    const trimmed = line.trim();
+    if(!trimmed) return false;
+    const cleaned = trimmed
+      .replace(/\d+\s*bpm/gi, '')
+      .replace(/wersja\s*z/gi, '')
+      .replace(/capo\s*\d+/gi, '')
+      .replace(/\b\d+\/\d+\b/g, '')
+      .replace(/[\s\-–,.:]/g, '');
+    return cleaned === '';
+  }
   function extractPresentationBlocks(body){
     const rawLines = body.split('\n');
     const blocks = [];
@@ -6114,7 +6128,7 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
       current = [];
     }
     rawLines.forEach(line => {
-      if(isChordLineForExport(line)) return; // drop chord-only lines entirely
+      if(isChordLineForExport(line) || isMetaInfoLineForExport(line)) return; // drop chord-only and tempo/capo-only lines entirely
       if(line.trim() === ''){
         flush();
       } else {
