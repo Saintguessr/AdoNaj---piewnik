@@ -6125,6 +6125,76 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     return blocks;
   }
 
+  // ---------- Unicode (Polish-diacritics-capable) font for the exported PDF ----------
+  // jsPDF's built-in fonts (helvetica/times/courier) only cover WinAnsi and
+  // silently drop/garble ą ć ę ł ń ó ś ź ż. We fetch a real Unicode TTF once,
+  // embed it into the PDF via addFileToVFS/addFont, and cache the base64 in
+  // localStorage so later exports (even offline) don't need the network.
+  const PDF_FONT_URL = 'https://cdn.jsdelivr.net/gh/googlefonts/roboto@main/src/hinted/Roboto-Regular.ttf';
+  const PDF_FONT_CACHE_KEY = 'adonaj_pdf_font_roboto_v1';
+  let cachedPdfFontBase64 = null;
+
+  function arrayBufferToBase64(buffer){
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const chunkSize = 0x8000; // avoid call-stack limits on String.fromCharCode.apply for large files
+    for(let i=0;i<bytes.length;i+=chunkSize){
+      binary += String.fromCharCode.apply(null, bytes.subarray(i, i+chunkSize));
+    }
+    return btoa(binary);
+  }
+
+  async function getPdfFontBase64(){
+    if(cachedPdfFontBase64) return cachedPdfFontBase64;
+    try {
+      const stored = localStorage.getItem(PDF_FONT_CACHE_KEY);
+      if(stored){ cachedPdfFontBase64 = stored; return stored; }
+    } catch(e){ /* localStorage unavailable - just fetch every time */ }
+    const res = await fetch(PDF_FONT_URL);
+    if(!res.ok) throw new Error('Nie udało się pobrać czcionki.');
+    const buf = await res.arrayBuffer();
+    const base64 = arrayBufferToBase64(buf);
+    cachedPdfFontBase64 = base64;
+    try { localStorage.setItem(PDF_FONT_CACHE_KEY, base64); } catch(e){ /* storage full/unavailable - not fatal */ }
+    return base64;
+  }
+
+  function registerPdfFont(doc, base64){
+    doc.addFileToVFS('Roboto-Regular.ttf', base64);
+    doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
+    doc.setFont('Roboto', 'normal');
+  }
+
+  // Fits `lines` into a box of maxWidth x maxHeight, shrinking the font
+  // down to a minimum readable size. If it still doesn't fit at that
+  // minimum, the text is split across as many extra slides as needed
+  // instead of overflowing/overlapping on a single one.
+  function layoutBlockText(doc, lines, maxWidth, maxHeight){
+    const minFontSize = 16;
+    let fontSize = 34;
+    let wrapped = [];
+    let lineHeight = fontSize*1.35;
+    for(; fontSize >= minFontSize; fontSize -= 2){
+      doc.setFont('Roboto','normal');
+      doc.setFontSize(fontSize);
+      wrapped = [];
+      lines.forEach(l => { wrapped.push(...doc.splitTextToSize(l, maxWidth)); });
+      lineHeight = fontSize*1.35;
+      if(wrapped.length*lineHeight <= maxHeight) return [{ fontSize, lineHeight, lines: wrapped }];
+    }
+    doc.setFont('Roboto','normal');
+    doc.setFontSize(minFontSize);
+    wrapped = [];
+    lines.forEach(l => { wrapped.push(...doc.splitTextToSize(l, maxWidth)); });
+    lineHeight = minFontSize*1.35;
+    const perPage = Math.max(1, Math.floor(maxHeight/lineHeight));
+    const pages = [];
+    for(let i=0;i<wrapped.length;i+=perPage){
+      pages.push({ fontSize: minFontSize, lineHeight, lines: wrapped.slice(i, i+perPage) });
+    }
+    return pages;
+  }
+
   pldExportBtn.addEventListener('click', async () => {
     const pl = getPlaylist(currentPlaylistId);
     if(!pl || !pl.songs.length){
@@ -6135,9 +6205,13 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     pldExportBtn.disabled = true;
     pldExportBtn.textContent = '⏳';
     try {
-      const { jsPDF } = await import('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/+esm');
+      const [{ jsPDF }, fontBase64] = await Promise.all([
+        import('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/+esm'),
+        getPdfFontBase64()
+      ]);
       const W = 960, H = 540;
       const doc = new jsPDF({ orientation:'landscape', unit:'pt', format:[W,H] });
+      registerPdfFont(doc, fontBase64);
       let firstPage = true;
       let anySlide = false;
 
@@ -6147,42 +6221,33 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
         const song = SONGS[idx];
         const blocks = extractPresentationBlocks(song.body);
         blocks.forEach(block => {
-          anySlide = true;
-          if(firstPage){ firstPage = false; } else { doc.addPage([W,H], 'landscape'); }
+          const pages = layoutBlockText(doc, block.lines, W-140, H-140);
+          pages.forEach((page, pageIdx) => {
+            anySlide = true;
+            if(firstPage){ firstPage = false; } else { doc.addPage([W,H], 'landscape'); }
 
-          doc.setFillColor(15,23,42);
-          doc.rect(0,0,W,H,'F');
+            doc.setFillColor(15,23,42);
+            doc.rect(0,0,W,H,'F');
 
-          doc.setTextColor(148,163,184);
-          doc.setFont(undefined,'normal');
-          doc.setFontSize(15);
-          doc.text(song.title, 30, 34, { maxWidth: W-160 });
+            doc.setFont('Roboto','normal');
+            doc.setTextColor(148,163,184);
+            doc.setFontSize(15);
+            const titleLabel = song.title + (pages.length > 1 ? ' (' + (pageIdx+1) + '/' + pages.length + ')' : '');
+            doc.text(titleLabel, 30, 34, { maxWidth: W-160 });
 
-          if(block.isRef){
-            doc.setTextColor(250,204,21);
-            doc.setFontSize(13);
-            doc.text('REFREN', W-30, 34, { align:'right' });
-          }
+            if(block.isRef){
+              doc.setTextColor(250,204,21);
+              doc.setFontSize(13);
+              doc.text('REFREN', W-30, 34, { align:'right' });
+            }
 
-          let fontSize = 34;
-          let wrapped = [];
-          while(fontSize > 14){
-            doc.setFontSize(fontSize);
-            wrapped = [];
-            block.lines.forEach(l => {
-              const w = doc.splitTextToSize(l, W-140);
-              wrapped.push(...w);
+            doc.setFont('Roboto','normal');
+            doc.setTextColor(241,245,249);
+            doc.setFontSize(page.fontSize);
+            const startY = Math.max(90, (H - page.lines.length*page.lineHeight)/2 + page.fontSize);
+            page.lines.forEach((l,i) => {
+              doc.text(l, W/2, startY + i*page.lineHeight, { align:'center' });
             });
-            const lineHeight = fontSize*1.35;
-            if(wrapped.length*lineHeight < H-140) break;
-            fontSize -= 2;
-          }
-
-          doc.setTextColor(241,245,249);
-          const lineHeight = fontSize*1.35;
-          const startY = Math.max(90, (H - wrapped.length*lineHeight)/2 + fontSize);
-          wrapped.forEach((l,i) => {
-            doc.text(l, W/2, startY + i*lineHeight, { align:'center' });
           });
         });
       });
