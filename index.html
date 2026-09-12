@@ -327,6 +327,19 @@
     background:var(--card2); color:var(--muted); font-size:12.5px; text-align:left; cursor:pointer;
   }
   .met-sound-btn.active{border-color:var(--accent); color:var(--accent); font-weight:700;}
+
+  /* ---------- Autoprzewijanie (auto-scroll) ---------- */
+  #autoscrollPanel{
+    position:fixed; left:16px; bottom:calc(16px + var(--safe-bottom)); z-index:40;
+    width:220px; background:var(--bg2); border:1px solid var(--border); border-radius:16px;
+    padding:14px; box-shadow:0 8px 26px rgba(0,0,0,.55); display:none;
+  }
+  #autoscrollPanel.open{display:block;}
+  .as-toggle-btn{
+    width:34px; height:34px; border-radius:8px; border:1px solid var(--border);
+    background:var(--card2); color:var(--text); font-size:16px; cursor:pointer; margin-right:4px;
+  }
+  .as-toggle-btn.active{color:var(--accent); border-color:var(--accent);}
 </style>
 </head>
 <body>
@@ -397,6 +410,7 @@
       <button class="back-btn" id="backBtn">‹ Wróć</button>
       <div class="detail-title" id="detailTitle"></div>
       <button class="pl-add-btn" id="addToPlaylistBtn" title="Dodaj do setlisty">♫+</button>
+      <button class="as-toggle-btn" id="autoscrollToggleBtn" title="Autoprzewijanie">⇅</button>
       <div class="font-controls">
         <button id="fontMinus">A-</button>
         <button id="fontPlus">A+</button>
@@ -502,6 +516,23 @@
       <button class="met-sound-btn" data-sound="claves">Claves</button>
       <button class="met-sound-btn" data-sound="click">Suchy klik</button>
       <button class="met-sound-btn" data-sound="deep">Głębokie stuknięcie</button>
+    </div>
+  </div>
+
+  <div id="autoscrollPanel">
+    <div class="met-header">
+      <span>Autoprzewijanie</span>
+      <button id="autoscrollCloseBtn" class="pld-icon-btn" title="Zwiń">×</button>
+    </div>
+
+    <button id="autoscrollPlayBtn" class="met-play-btn">▶ Start</button>
+
+    <div class="met-row" style="flex-direction:column; align-items:stretch; gap:8px;">
+      <div style="display:flex; justify-content:space-between;">
+        <span class="met-row-label">Szybkość</span>
+        <span id="autoscrollSpeedValue" style="color:var(--accent); font-weight:800;">10</span>
+      </div>
+      <input type="range" id="autoscrollSpeedSlider" min="1" max="20" step="1" value="10" style="width:100%; accent-color:var(--accent);">
     </div>
   </div>
 
@@ -1153,20 +1184,20 @@ Capo 4
 
 G                  C/G          
 Niech Pan Cię strzeże i błogosławi 
-G                      Dsus4                
+G                      Disus4                
 Rozjaśni oblicze nad tobą w miłosierdziu swym 
 e               C/G     G
 Niech twarz obróci ku tobie
-     Dsus4       G
+     Disus4       G
 I pokój swój da
 
 G                  C/G          
 Niech Pan Cię strzeże i błogosławi 
-G                      Dsus4                
+G                      Disus4                
 Rozjaśni oblicze nad tobą w miłosierdziu swym 
 e               C/G     G
 Niech twarz obróci ku tobie
-     Dsus4       G
+     Disus4       G
 I pokój swój da
 
 e        C
@@ -1180,11 +1211,11 @@ A - amen
 
 G                  C/G          
 Niech Pan Cię strzeże i błogosławi 
-G                      Dsus4                
+G                      Disus4                
 Rozjaśni oblicze nad tobą w miłosierdziu swym 
 e               C/G     G
 Niech twarz obróci ku tobie
-     Dsus4       G
+     Disus4       G
 I pokój swój da
 
 e        C
@@ -5580,6 +5611,13 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
   const fontMinus = document.getElementById('fontMinus');
   const fontPlus = document.getElementById('fontPlus');
   const addToPlaylistBtn = document.getElementById('addToPlaylistBtn');
+  const songBodyWrap = document.getElementById('song-body-wrap');
+  const autoscrollToggleBtn = document.getElementById('autoscrollToggleBtn');
+  const autoscrollPanel = document.getElementById('autoscrollPanel');
+  const autoscrollCloseBtn = document.getElementById('autoscrollCloseBtn');
+  const autoscrollPlayBtn = document.getElementById('autoscrollPlayBtn');
+  const autoscrollSpeedSlider = document.getElementById('autoscrollSpeedSlider');
+  const autoscrollSpeedValue = document.getElementById('autoscrollSpeedValue');
 
   const tabSongs = document.getElementById('tabSongs');
   const tabPlaylists = document.getElementById('tabPlaylists');
@@ -5699,6 +5737,7 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     const elClosed = overlayStack.pop();
     if(elClosed){
       elClosed.classList.remove('open');
+      if(elClosed === detailView){ stopAutoscroll(); autoscrollPanel.classList.remove('open'); }
       if(elClosed === customDialogBackdrop && dialogResolve){
         const resolveFn = dialogResolve;
         const result = dialogPendingResult;
@@ -5781,6 +5820,8 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
       if(i < lines.length - 1) frag.appendChild(document.createTextNode('\n'));
     });
     songBody.appendChild(frag);
+    stopAutoscroll();
+    autoscrollPanel.classList.remove('open');
     document.getElementById('song-body-wrap').scrollTop = 0;
     openOverlay(detailView);
   }
@@ -5791,6 +5832,77 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
   });
 
   backBtn.addEventListener('click', goBack);
+
+  // ---------- Autoprzewijanie (auto-scroll while reading a song) ----------
+  // Speed is a 1-20 dial saved between sessions; internally mapped to
+  // pixels/second so the scroll stays smooth regardless of frame rate.
+  const AUTOSCROLL_SPEED_KEY = 'adonaj_autoscroll_speed_v1';
+  const AUTOSCROLL_PX_PER_LEVEL = 7; // level 1 -> 7px/s (very slow), level 20 -> 140px/s (fast)
+  let autoscrollSpeed = 10;
+  try {
+    const savedSpeed = parseInt(localStorage.getItem(AUTOSCROLL_SPEED_KEY), 10);
+    if(!isNaN(savedSpeed)) autoscrollSpeed = Math.min(20, Math.max(1, savedSpeed));
+  } catch(e){ /* localStorage unavailable - use default */ }
+  autoscrollSpeedSlider.value = autoscrollSpeed;
+  autoscrollSpeedValue.textContent = autoscrollSpeed;
+
+  let autoscrollActive = false;
+  let autoscrollRAF = null;
+  let autoscrollLastTs = null;
+
+  function autoscrollStep(ts){
+    if(!autoscrollActive) return;
+    if(autoscrollLastTs === null) autoscrollLastTs = ts;
+    const dtSec = Math.min(0.25, (ts - autoscrollLastTs) / 1000); // clamp to avoid a huge jump after a tab was backgrounded
+    autoscrollLastTs = ts;
+    songBodyWrap.scrollTop += autoscrollSpeed * AUTOSCROLL_PX_PER_LEVEL * dtSec;
+    if(songBodyWrap.scrollTop + songBodyWrap.clientHeight >= songBodyWrap.scrollHeight - 1){
+      stopAutoscroll(); // reached the bottom - stop instead of idling
+      return;
+    }
+    autoscrollRAF = requestAnimationFrame(autoscrollStep);
+  }
+
+  function startAutoscroll(){
+    if(autoscrollActive) return;
+    // Already at (or essentially at) the bottom - nothing to scroll to.
+    if(songBodyWrap.scrollTop + songBodyWrap.clientHeight >= songBodyWrap.scrollHeight - 1) return;
+    autoscrollActive = true;
+    autoscrollLastTs = null;
+    autoscrollPlayBtn.textContent = '⏸ Stop';
+    autoscrollPlayBtn.classList.add('playing');
+    autoscrollRAF = requestAnimationFrame(autoscrollStep);
+  }
+  function stopAutoscroll(){
+    autoscrollActive = false;
+    if(autoscrollRAF) cancelAnimationFrame(autoscrollRAF);
+    autoscrollRAF = null;
+    autoscrollPlayBtn.textContent = '▶ Start';
+    autoscrollPlayBtn.classList.remove('playing');
+  }
+
+  autoscrollToggleBtn.addEventListener('click', () => {
+    autoscrollPanel.classList.toggle('open');
+    autoscrollToggleBtn.classList.toggle('active', autoscrollPanel.classList.contains('open'));
+  });
+  autoscrollCloseBtn.addEventListener('click', () => {
+    autoscrollPanel.classList.remove('open');
+    autoscrollToggleBtn.classList.remove('active');
+  });
+  autoscrollPlayBtn.addEventListener('click', () => {
+    if(autoscrollActive) stopAutoscroll(); else startAutoscroll();
+  });
+  autoscrollSpeedSlider.addEventListener('input', () => {
+    autoscrollSpeed = parseInt(autoscrollSpeedSlider.value, 10);
+    autoscrollSpeedValue.textContent = autoscrollSpeed;
+    try { localStorage.setItem(AUTOSCROLL_SPEED_KEY, String(autoscrollSpeed)); } catch(e){ /* not fatal */ }
+  });
+  // A deliberate manual scroll/swipe/wheel means the person wants to take
+  // over - pause the automatic scroll rather than fight their gesture.
+  ['touchstart','wheel'].forEach(evName => {
+    songBodyWrap.addEventListener(evName, () => { if(autoscrollActive) stopAutoscroll(); }, { passive:true });
+  });
+
 
   searchInput.addEventListener('input', () => {
     clearBtn.style.display = searchInput.value ? 'block' : 'none';
