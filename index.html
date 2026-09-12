@@ -414,6 +414,7 @@
         <button class="pld-title-btn" id="pldTitleBtn"></button>
       </div>
       <button class="pld-icon-btn" id="pldShareBtn" title="Udostępnij (tylko do odczytu)">🔗</button>
+      <button class="pld-icon-btn" id="pldExportBtn" title="Eksportuj do prezentacji (PDF)">📊</button>
       <button class="pld-icon-btn" id="pldDeleteBtn" title="Usuń setlistę">🗑</button>
     </div>
     <div id="playlistSongsContainer"></div>
@@ -584,7 +585,7 @@
   // ---------- Main app ----------
 (function(){
   const SONGS = [
-    { title: "Adorujmy Najwyższego - AdoNaj",
+  { title: "Adorujmy Najwyższego - AdoNaj",
     body: `
 	158 BPM 3/4
 	a F G C
@@ -5565,6 +5566,7 @@ e D G a H7
 Już nie będę się bał – cóż może zrobić mi śmierć?
 e D G a H7
 Nie, nie lękam się i śpiewam chwały pieśń.` }
+
 ];
 
   const listContainer = document.getElementById('listContainer');
@@ -5593,6 +5595,7 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
   const pldTitleBtn = document.getElementById('pldTitleBtn');
   const pldDeleteBtn = document.getElementById('pldDeleteBtn');
   const pldShareBtn = document.getElementById('pldShareBtn');
+  const pldExportBtn = document.getElementById('pldExportBtn');
   const viewerView = document.getElementById('viewer-view');
   const viewerTitle = document.getElementById('viewerTitle');
   const viewerSongsContainer = document.getElementById('viewerSongsContainer');
@@ -6053,6 +6056,148 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
     let copied = false;
     try { await navigator.clipboard.writeText(url); copied = true; } catch(e){ /* clipboard permission denied or unsupported - link is still shown below to copy manually */ }
     await customPrompt((copied ? 'Link skopiowany do schowka!' : 'Skopiuj poniższy link ręcznie:') + '\nKażdy, kto go otworzy, zobaczy tę setlistę bez możliwości edycji.', url);
+  });
+
+  // ---------- Export setlist to a presentation PDF ----------
+  // One "slide" (landscape PDF page) per stanza/refrain, chords stripped,
+  // large auto-sized centered text on a dark background - meant to be
+  // shown full-screen to a room during a prayer meeting. jsPDF is loaded
+  // lazily (only when the export button is actually pressed) so it never
+  // costs anything on a normal page load.
+  function isChordLineForExport(line){
+    if(isChordLine(line)) return true;
+    const trimmed = line.trim();
+    if(!trimmed) return false;
+    const tokens = trimmed.split(/\s+/);
+    return tokens.every(t => t === '|' || t === '||' || CHORD_TOKEN.test(t));
+  }
+  function extractPresentationBlocks(body){
+    const rawLines = body.split('\n');
+    const blocks = [];
+    let current = [];
+    let mainRefrainLines = null; // remembers the first full refrain seen, so
+    // later shorthand repeats ("Ref. Duszo ma..") can be expanded to the
+    // full text instead of showing a near-empty, confusing slide.
+
+    function flushLines(lines){
+      let nonEmpty = lines.filter(l => l.trim() !== '' && !isChordLineForExport(l));
+      if(!nonEmpty.length) return;
+      const isRef = isRefLine(nonEmpty[0]);
+      const stripped = nonEmpty[0].replace(/^\s*(Ref\.?|Refren|REFREN|Bridge|BRIDGE|Coda)\s*:?\s*/i, '');
+      let linesOut = stripped.trim() ? [stripped, ...nonEmpty.slice(1)] : nonEmpty.slice(1);
+      linesOut = linesOut.filter(l => !isChordLineForExport(l));
+      if(!linesOut.length) linesOut = nonEmpty;
+      if(isRef){
+        const textLen = linesOut.join(' ').length;
+        if(mainRefrainLines && textLen < 25){
+          linesOut = mainRefrainLines; // shorthand pointer - show the full refrain instead
+        } else if(!mainRefrainLines || textLen > mainRefrainLines.join(' ').length){
+          mainRefrainLines = linesOut;
+        }
+      }
+      blocks.push({ isRef, lines: linesOut });
+    }
+    function flush(){
+      // A "Ref./Refren" label sometimes appears glued to the end of a verse
+      // (no blank line before it in the source) - split it into its own
+      // slide instead of leaving it as a trailing fragment on the verse.
+      let splitIdx = -1;
+      for(let i=1;i<current.length;i++){
+        if(isRefLine(current[i])){ splitIdx = i; break; }
+      }
+      if(splitIdx > 0){
+        flushLines(current.slice(0, splitIdx));
+        flushLines(current.slice(splitIdx));
+      } else {
+        flushLines(current);
+      }
+      current = [];
+    }
+    rawLines.forEach(line => {
+      if(isChordLineForExport(line)) return; // drop chord-only lines entirely
+      if(line.trim() === ''){
+        flush();
+      } else {
+        current.push(line);
+      }
+    });
+    flush();
+    return blocks;
+  }
+
+  pldExportBtn.addEventListener('click', async () => {
+    const pl = getPlaylist(currentPlaylistId);
+    if(!pl || !pl.songs.length){
+      await customAlert('Ta setlista jest pusta - nie ma czego eksportować.');
+      return;
+    }
+    const originalText = pldExportBtn.textContent;
+    pldExportBtn.disabled = true;
+    pldExportBtn.textContent = '⏳';
+    try {
+      const { jsPDF } = await import('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/+esm');
+      const W = 960, H = 540;
+      const doc = new jsPDF({ orientation:'landscape', unit:'pt', format:[W,H] });
+      let firstPage = true;
+      let anySlide = false;
+
+      pl.songs.forEach(title => {
+        const idx = titleToIdx[title];
+        if(idx === undefined) return;
+        const song = SONGS[idx];
+        const blocks = extractPresentationBlocks(song.body);
+        blocks.forEach(block => {
+          anySlide = true;
+          if(firstPage){ firstPage = false; } else { doc.addPage([W,H], 'landscape'); }
+
+          doc.setFillColor(15,23,42);
+          doc.rect(0,0,W,H,'F');
+
+          doc.setTextColor(148,163,184);
+          doc.setFont(undefined,'normal');
+          doc.setFontSize(15);
+          doc.text(song.title, 30, 34, { maxWidth: W-160 });
+
+          if(block.isRef){
+            doc.setTextColor(250,204,21);
+            doc.setFontSize(13);
+            doc.text('REFREN', W-30, 34, { align:'right' });
+          }
+
+          let fontSize = 34;
+          let wrapped = [];
+          while(fontSize > 14){
+            doc.setFontSize(fontSize);
+            wrapped = [];
+            block.lines.forEach(l => {
+              const w = doc.splitTextToSize(l, W-140);
+              wrapped.push(...w);
+            });
+            const lineHeight = fontSize*1.35;
+            if(wrapped.length*lineHeight < H-140) break;
+            fontSize -= 2;
+          }
+
+          doc.setTextColor(241,245,249);
+          const lineHeight = fontSize*1.35;
+          const startY = Math.max(90, (H - wrapped.length*lineHeight)/2 + fontSize);
+          wrapped.forEach((l,i) => {
+            doc.text(l, W/2, startY + i*lineHeight, { align:'center' });
+          });
+        });
+      });
+
+      if(!anySlide){
+        await customAlert('Nie znaleziono żadnego tekstu do wyeksportowania w tej setliście.');
+      } else {
+        doc.save((pl.name || 'setlista').replace(/[\\/:*?"<>|]/g,'_') + '.pdf');
+      }
+    } catch(e){
+      await customAlert('Nie udało się wygenerować prezentacji. Sprawdź połączenie z internetem i spróbuj ponownie.');
+    } finally {
+      pldExportBtn.disabled = false;
+      pldExportBtn.textContent = originalText;
+    }
   });
 
   pldAddSongBtn.addEventListener('click', () => {
