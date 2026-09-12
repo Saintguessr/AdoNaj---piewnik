@@ -5837,7 +5837,7 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
   // Speed is a 1-20 dial saved between sessions; internally mapped to
   // pixels/second so the scroll stays smooth regardless of frame rate.
   const AUTOSCROLL_SPEED_KEY = 'adonaj_autoscroll_speed_v1';
-  const AUTOSCROLL_PX_PER_LEVEL = 7; // level 1 -> 7px/s (very slow), level 20 -> 140px/s (fast)
+  const AUTOSCROLL_PX_PER_LEVEL = 0.875; // level 1 -> 0.875px/s (very slow), level 20 -> 17.5px/s (fast) - 8x slower than before
   let autoscrollSpeed = 10;
   try {
     const savedSpeed = parseInt(localStorage.getItem(AUTOSCROLL_SPEED_KEY), 10);
@@ -6788,7 +6788,3 @@ Nie, nie lękam się i śpiewam chwały pieśń.` }
       reg.update();
     }).catch(()=>{});
   }
-})();
-</script>
-</body>
-</html>
